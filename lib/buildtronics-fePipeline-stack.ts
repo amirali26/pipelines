@@ -4,7 +4,6 @@ import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
 import * as role from '@aws-cdk/aws-iam';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as cdk from '@aws-cdk/core';
-import { Resolver } from 'dns';
 
 export class BuildtronicsFePipeline extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -33,7 +32,6 @@ export class BuildtronicsFePipeline extends cdk.Stack {
 
     // Artifacts
     const sourceOutput = new codepipeline.Artifact();
-    const sourceInputs = new codepipeline.Artifact();
 
     // Codebuild
     const project = new PipelineProject(this, 'BuildtronicsFE', {
@@ -82,13 +80,8 @@ export class BuildtronicsFePipeline extends cdk.Stack {
       actions: [codebuildAction],
     };
 
-    const deployStage: codepipeline.StageProps = {
-      stageName: 'Deploy',
-      actions: [gitHubAction],
-    };
-
     // Pipeline
-    const pipeline = new codepipeline.Pipeline(
+    new codepipeline.Pipeline(
       this,
       'BuildtronicsReactFEPipeline',
       {
