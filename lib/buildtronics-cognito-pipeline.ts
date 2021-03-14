@@ -13,6 +13,11 @@ export class BuildtronicsCognitoPipeline extends cdk.Stack {
             description: 'Role to provide access to codepipeline to s3 bucker',
         });
 
+        _role.addToPolicy(new role.PolicyStatement({
+            resources: ['*'],
+            actions: ['*'],
+        }));
+
         const codeBuildProject = new codebuild.PipelineProject(this, 'buildtronics-cognito-codebuildproject', {
             projectName: 'buildtronics-cognitocodebuild',
             buildSpec: codebuild.BuildSpec.fromSourceFilename('build/buildspec.yaml'),
