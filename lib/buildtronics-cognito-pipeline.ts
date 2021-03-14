@@ -7,11 +7,8 @@ export class BuildtronicsCognitoPipeline extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const pipeline = new codepipeline.Pipeline(this, 'buildtronics-cognitopipeline', {
-            pipelineName: 'buildtronics-cognitopipeline',
-        });
-
-        const codeBuildProject = new codebuild.Project(this, 'buildtronics-cognito-codebuildproject', {
+        const codeBuildProject = new codebuild.PipelineProject(this, 'buildtronics-cognito-codebuildproject', {
+            projectName: 'buildtronics-cognitocodebuild',
             buildSpec: codebuild.BuildSpec.fromSourceFilename('build/buildspec.yaml'),
         });
 
@@ -28,26 +25,37 @@ export class BuildtronicsCognitoPipeline extends cdk.Stack {
                 }
             ),
             owner: 'buildtronics',
-            repo: 'https://github.com/buildtronics/buildtronics-login',
+            repo: 'buildtronics-login',
             output: sourceOutput,
             branch: 'master',
-        });
-
-        pipeline.addStage({
-            stageName: 'Github Source',
-            actions: [sourceAction]
         });
 
         // Build phase
         const buildAction = new codepipelineAction.CodeBuildAction({
             actionName: 'buildtronics-stackbuild',
+            project: codeBuildProject,
             input: sourceOutput,
-            project: codeBuildProject, 
         });
 
-        pipeline.addStage({
-            stageName: 'Build source',
-            actions: [buildAction]
-        });
+        const sourceStage: codepipeline.StageProps = {
+            stageName: 'Source',
+            actions: [sourceAction],
+        };
+
+        const buildStage: codepipeline.StageProps = {
+            stageName: 'Build',
+            actions: [buildAction],
+        };
+
+        // Pipeline
+        new codepipeline.Pipeline(
+            this,
+            'buildtronics-cognitopipeline',
+            {
+                pipelineName: 'buildtronics-cognito-pipeline',
+                crossAccountKeys: false,
+                stages: [sourceStage, buildStage],
+            }
+        );
     }
 }
