@@ -2,14 +2,21 @@ import * as codebuild from '@aws-cdk/aws-codebuild';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
 import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
 import * as cdk from '@aws-cdk/core';
+import * as role from '@aws-cdk/aws-iam';
 
 export class BuildtronicsCognitoPipeline extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
+        const _role = new role.Role(this, 'S3 Role', {
+            assumedBy: new role.ServicePrincipal('codebuild.amazonaws.com'),
+            description: 'Role to provide access to codepipeline to s3 bucker',
+        });
+
         const codeBuildProject = new codebuild.PipelineProject(this, 'buildtronics-cognito-codebuildproject', {
             projectName: 'buildtronics-cognitocodebuild',
             buildSpec: codebuild.BuildSpec.fromSourceFilename('build/buildspec.yaml'),
+            role: _role,
         });
 
         const sourceOutput = new codepipeline.Artifact();
