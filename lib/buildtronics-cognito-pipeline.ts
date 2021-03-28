@@ -4,7 +4,7 @@ import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
 import * as cdk from '@aws-cdk/core';
 import * as role from '@aws-cdk/aws-iam';
 
-export class BuildtronicsCognitoPipeline extends cdk.Stack {
+export class worldwideandwebCognitoPipeline extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
@@ -18,8 +18,8 @@ export class BuildtronicsCognitoPipeline extends cdk.Stack {
             actions: ['*'],
         }));
 
-        const codeBuildProject = new codebuild.PipelineProject(this, 'buildtronics-cognito-codebuildproject', {
-            projectName: 'buildtronics-cognitocodebuild',
+        const codeBuildProject = new codebuild.PipelineProject(this, 'worldwideandweb-cognito-codebuildproject', {
+            projectName: 'worldwideandweb-cognitocodebuild',
             buildSpec: codebuild.BuildSpec.fromSourceFilename('build/buildspec.yaml'),
             role: _role,
         });
@@ -28,7 +28,7 @@ export class BuildtronicsCognitoPipeline extends cdk.Stack {
 
         // Github source action
         const sourceAction = new codepipelineAction.GitHubSourceAction({
-            actionName: 'buildtronics-cognitopipelinesourceaction',
+            actionName: 'worldwideandweb-cognitopipelinesourceaction',
             //@ts-ignore
             oauthToken: cdk.SecretValue.secretsManager(
                 'arn:aws:secretsmanager:eu-west-1:460234074473:secret:github_personal_access_token-HSIOq3',
@@ -36,15 +36,15 @@ export class BuildtronicsCognitoPipeline extends cdk.Stack {
                     jsonField: 'value',
                 }
             ),
-            owner: 'buildtronics',
-            repo: 'buildtronics-login',
+            owner: 'worldwideandweb',
+            repo: 'worldwideandweb-login',
             output: sourceOutput,
             branch: 'master',
         });
 
         // Build phase
         const buildAction = new codepipelineAction.CodeBuildAction({
-            actionName: 'buildtronics-stackbuild',
+            actionName: 'worldwideandweb-stackbuild',
             project: codeBuildProject,
             input: sourceOutput,
         });
@@ -62,9 +62,9 @@ export class BuildtronicsCognitoPipeline extends cdk.Stack {
         // Pipeline
         new codepipeline.Pipeline(
             this,
-            'buildtronics-cognitopipeline',
+            'worldwideandweb-cognitopipeline',
             {
-                pipelineName: 'buildtronics-cognito-pipeline',
+                pipelineName: 'worldwideandweb-cognito-pipeline',
                 crossAccountKeys: false,
                 stages: [sourceStage, buildStage],
             }

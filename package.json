@@ -1,8 +1,8 @@
 {
-  "name": "buildtronics-be",
+  "name": "worldwideandweb-be",
   "version": "0.1.0",
   "bin": {
-    "buildtronics-be": "bin/buildtronics-be.js"
+    "worldwideandweb-be": "bin/worldwideandweb-be.js"
   },
   "scripts": {
     "build": "tsc",

@@ -5,13 +5,13 @@ import * as role from '@aws-cdk/aws-iam';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as cdk from '@aws-cdk/core';
 
-export class BuildtronicsFePipeline extends cdk.Stack {
+export class WorldWideAndWebFePipeline extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // S3Bucket
-    const siteBucket = new s3.Bucket(this, 'BuildtronicsFEProduction', {
-      bucketName: 'buildtronics-fe-pipeline',
+    const siteBucket = new s3.Bucket(this, 'WorldWideAndWebFEProduction', {
+      bucketName: 'worldwideandweb-fe-pipeline',
       publicReadAccess: true,
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'error.html',
@@ -34,8 +34,8 @@ export class BuildtronicsFePipeline extends cdk.Stack {
     const sourceOutput = new codepipeline.Artifact();
 
     // Codebuild
-    const project = new PipelineProject(this, 'BuildtronicsFE', {
-      projectName: 'BuildtronicsFE',
+    const project = new PipelineProject(this, 'WorldWideAndWebFE', {
+      projectName: 'WorldWideAndWebFE',
       buildSpec: BuildSpec.fromSourceFilename('buildspec.yaml'),
       role: s3Role,
       environmentVariables: {
@@ -48,7 +48,7 @@ export class BuildtronicsFePipeline extends cdk.Stack {
     // Actions
     const gitHubAction = new codepipelineAction.GitHubSourceAction({
       actionName: 'githubSourceAction',
-      owner: 'buildtronics',
+      owner: 'worldwideandweb',
       repo: 'react',
       // @ts-ignore
       oauthToken: cdk.SecretValue.secretsManager(
@@ -63,7 +63,7 @@ export class BuildtronicsFePipeline extends cdk.Stack {
     });
 
     const codebuildAction = new codepipelineAction.CodeBuildAction({
-      actionName: 'BuildtronicsFE',
+      actionName: 'WorldWideAndWebFE',
       project: project,
       input: sourceOutput,
     });
@@ -83,9 +83,9 @@ export class BuildtronicsFePipeline extends cdk.Stack {
     // Pipeline
     new codepipeline.Pipeline(
       this,
-      'BuildtronicsReactFEPipeline',
+      'WorldWideAndWebReactFEPipeline',
       {
-        pipelineName: 'BuildtronicsReactFEPipeline',
+        pipelineName: 'WorldWideAndWebReactFEPipeline',
         crossAccountKeys: false,
         stages: [sourceStage, buildStage],
       }
