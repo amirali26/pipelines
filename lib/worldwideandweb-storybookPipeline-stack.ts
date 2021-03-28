@@ -2,7 +2,6 @@ import { BuildSpec, PipelineProject } from '@aws-cdk/aws-codebuild';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
 import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
 import * as cdk from '@aws-cdk/core';
-import * as codeartifact from '@aws-cdk/aws-codeartifact';
 
 export class WorldWideAndWebStorybookCodeArtifact extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -11,23 +10,13 @@ export class WorldWideAndWebStorybookCodeArtifact extends cdk.Stack {
     // Artifacts
     const sourceOutput = new codepipeline.Artifact();
 
-    const repository = new codeartifact.CfnRepository(
-      this,
-      'WorldWideAndWebCodeArtifactRepository',
-      {
-        domainName: 'worldwideandweb',
-        repositoryName: 'worldwideandweb-storybook',
-        description:
-          'Repository for the storybook components for the worldwideandweb react project',
-        upstreams: ['npm-store'],
-      }
-    );
-
     // Codebuild
     const project = new PipelineProject(this, 'WorldWideAndWebStorybook', {
       projectName: 'WorldWideAndWebStorybook',
       buildSpec: BuildSpec.fromSourceFilename('buildspec.yaml'),
-      environmentVariables: {},
+      environmentVariables: {
+        
+      },
     });
 
     // Actions
