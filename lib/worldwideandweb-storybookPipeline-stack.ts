@@ -1,6 +1,12 @@
-import { BuildSpec, PipelineProject } from '@aws-cdk/aws-codebuild';
+import * as codeartifact from '@aws-cdk/aws-codeartifact';
+import {
+  BuildSpec,
+  LinuxBuildImage,
+  PipelineProject,
+} from '@aws-cdk/aws-codebuild';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
 import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
+import * as role from '@aws-cdk/aws-iam';
 import * as cdk from '@aws-cdk/core';
 
 export class WorldWideAndWebStorybookCodeArtifact extends cdk.Stack {
@@ -10,9 +16,34 @@ export class WorldWideAndWebStorybookCodeArtifact extends cdk.Stack {
     // Artifacts
     const sourceOutput = new codepipeline.Artifact();
 
+    // S3 bucket role
+    const codeartifactRole = new role.Role(this, 'CodeArtifactRole', {
+      assumedBy: new role.ServicePrincipal('codebuild.amazonaws.com'),
+      description: 'Role to provide access to codepipeline to s3 bucker',
+    });
+
+    codeartifactRole.addToPolicy(
+      new role.PolicyStatement({
+        resources: ['*'],
+        actions: ['*'],
+      })
+    );
+
+    const domain = new codeartifact.CfnDomain(
+      this,
+      'WorldWideAndWebCodeArtifactDomain',
+      {
+        domainName: 'worldwideandweb',
+      }
+    );
+
     // Codebuild
     const project = new PipelineProject(this, 'WorldWideAndWebStorybook', {
       projectName: 'WorldWideAndWebStorybook',
+      environment: {
+        buildImage: LinuxBuildImage.STANDARD_5_0,
+      },
+      role: codeartifactRole,
       buildSpec: BuildSpec.fromSourceFilename('buildspec.yaml'),
       environmentVariables: {
         

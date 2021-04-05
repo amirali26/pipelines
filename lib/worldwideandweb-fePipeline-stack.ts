@@ -1,4 +1,4 @@
-import { BuildSpec, PipelineProject } from '@aws-cdk/aws-codebuild';
+import { BuildSpec, LinuxBuildImage, PipelineProject } from '@aws-cdk/aws-codebuild';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
 import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
 import * as role from '@aws-cdk/aws-iam';
@@ -6,12 +6,13 @@ import * as s3 from '@aws-cdk/aws-s3';
 import * as cdk from '@aws-cdk/core';
 
 export class WorldWideAndWebFePipeline extends cdk.Stack {
+  public s3Role: s3.Bucket;
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // S3Bucket
-    const siteBucket = new s3.Bucket(this, 'WorldWideAndWebFEProduction', {
-      bucketName: 'worldwideandweb-fe-pipeline',
+    this.s3Role = new s3.Bucket(this, 'WorldWideAndWebFEProduction', {
+      bucketName: 'worldwideandweb-sitetest',
       publicReadAccess: true,
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'error.html',
@@ -35,13 +36,19 @@ export class WorldWideAndWebFePipeline extends cdk.Stack {
 
     // Codebuild
     const project = new PipelineProject(this, 'WorldWideAndWebFE', {
+      environment: {
+        buildImage: LinuxBuildImage.STANDARD_5_0,
+      },
       projectName: 'WorldWideAndWebFE',
       buildSpec: BuildSpec.fromSourceFilename('buildspec.yaml'),
       role: s3Role,
       environmentVariables: {
         DEPLOY_BUCKET: {
-          value: siteBucket.bucketName,
+          value: this.s3Role.bucketName,
         },
+        DISTRIBUTION: {
+          value: 'E2JZVXD8021PJ2',
+        }
       },
     });
 

@@ -21,6 +21,9 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
+    "@aws-cdk/aws-certificatemanager": "^1.85.0",
+    "@aws-cdk/aws-cloudfront": "^1.85.0",
+    "@aws-cdk/aws-cloudfront-origins": "^1.96.0",
     "@aws-cdk/aws-codeartifact": "1.85.0",
     "@aws-cdk/aws-codebuild": "1.85.0",
     "@aws-cdk/aws-codepipeline": "1.85.0",
