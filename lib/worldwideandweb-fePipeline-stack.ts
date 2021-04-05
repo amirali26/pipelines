@@ -12,7 +12,7 @@ export class WorldWideAndWebFePipeline extends cdk.Stack {
 
     // S3Bucket
     this.s3Role = new s3.Bucket(this, 'WorldWideAndWebFEProduction', {
-      bucketName: 'worldwideandweb-sitetest',
+      bucketName: 'worldwideandweb-fe-pipeline',
       publicReadAccess: true,
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'error.html',
