@@ -3,6 +3,7 @@ import * as cdk from '@aws-cdk/core';
 import 'source-map-support/register';
 import { WorldWideAndWebStorybookCertificateManager } from '../lib/worldwideandweb-certificateManager';
 import { WorldWideAndWebStorybookCloudfront } from '../lib/worldwideandweb-cloudfront';
+import { worldwideandwebCognitoPipeline } from '../lib/worldwideandweb-cognito-pipeline';
 import { WorldWideAndWebFePipeline } from '../lib/worldwideandweb-fePipeline-stack';
 import { WorldWideAndWebStorybookCodeArtifact } from '../lib/worldwideandweb-storybookPipeline-stack';
 
@@ -33,4 +34,4 @@ new WorldWideAndWebStorybookCloudfront(
   s3Role,
   { env: envEuWest1 }
 );
-// new worldwideandwebCognitoPipeline(app, 'WorldWideAndWebCognitoPipeline', {env: envEuWest1});
+new worldwideandwebCognitoPipeline(app, 'WorldWideAndWebCognitoPipeline', {env: envEuWest1});

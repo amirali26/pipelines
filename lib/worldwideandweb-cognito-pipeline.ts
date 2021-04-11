@@ -20,7 +20,7 @@ export class worldwideandwebCognitoPipeline extends cdk.Stack {
 
         const codeBuildProject = new codebuild.PipelineProject(this, 'worldwideandweb-cognito-codebuildproject', {
             projectName: 'worldwideandweb-cognitocodebuild',
-            buildSpec: codebuild.BuildSpec.fromSourceFilename('build/buildspec.yaml'),
+            buildSpec: codebuild.BuildSpec.fromSourceFilename('buildspec.yaml'),
             role: _role,
         });
 
@@ -37,7 +37,7 @@ export class worldwideandwebCognitoPipeline extends cdk.Stack {
                 }
             ),
             owner: 'worldwideandweb',
-            repo: 'worldwideandweb-login',
+            repo: 'cognito',
             output: sourceOutput,
             branch: 'master',
         });
