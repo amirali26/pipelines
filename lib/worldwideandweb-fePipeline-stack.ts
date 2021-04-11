@@ -15,7 +15,7 @@ export class WorldWideAndWebFePipeline extends cdk.Stack {
       bucketName: 'worldwideandweb-fe-pipeline',
       publicReadAccess: true,
       websiteIndexDocument: 'index.html',
-      websiteErrorDocument: 'error.html',
+      websiteErrorDocument: 'index.html',
 
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
