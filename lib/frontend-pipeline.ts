@@ -5,14 +5,14 @@ import * as role from '@aws-cdk/aws-iam';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as cdk from '@aws-cdk/core';
 
-export class WorldWideAndWebFePipeline extends cdk.Stack {
+export class FrontendPipeline extends cdk.Stack {
   public s3Role: s3.Bucket;
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // S3Bucket
-    this.s3Role = new s3.Bucket(this, 'WorldWideAndWebFEProduction', {
-      bucketName: 'worldwideandweb-fe-pipeline',
+    this.s3Role = new s3.Bucket(this, 'helpmycase-s3-bucekt', {
+      bucketName: 'helpmycase-frontend',
       publicReadAccess: true,
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'index.html',
@@ -35,13 +35,13 @@ export class WorldWideAndWebFePipeline extends cdk.Stack {
     const sourceOutput = new codepipeline.Artifact();
 
     // Codebuild
-    const project = new PipelineProject(this, 'WorldWideAndWebFE', {
+    const project = new PipelineProject(this, 'helpmycase-react-ui-codebuildproject', {
       environment: {
         buildImage: LinuxBuildImage.STANDARD_5_0,
       },
-      projectName: 'WorldWideAndWebFE',
+      projectName: 'helpmycase-react-ui',
       buildSpec: BuildSpec.fromSourceFilename('buildspec.yaml'),
-      role: s3Role,
+      role: s3Role as any,
       environmentVariables: {
         DEPLOY_BUCKET: {
           value: this.s3Role.bucketName,
@@ -55,8 +55,8 @@ export class WorldWideAndWebFePipeline extends cdk.Stack {
     // Actions
     const gitHubAction = new codepipelineAction.GitHubSourceAction({
       actionName: 'githubSourceAction',
-      owner: 'worldwideandweb',
-      repo: 'react',
+      owner: 'handlemycase',
+      repo: 'react-ui',
       // @ts-ignore
       oauthToken: cdk.SecretValue.secretsManager(
         'arn:aws:secretsmanager:eu-west-1:460234074473:secret:github_personal_access_token-HSIOq3',
@@ -70,7 +70,7 @@ export class WorldWideAndWebFePipeline extends cdk.Stack {
     });
 
     const codebuildAction = new codepipelineAction.CodeBuildAction({
-      actionName: 'WorldWideAndWebFE',
+      actionName: 'helpmycase-react-ui',
       project: project,
       input: sourceOutput,
     });
@@ -90,9 +90,9 @@ export class WorldWideAndWebFePipeline extends cdk.Stack {
     // Pipeline
     new codepipeline.Pipeline(
       this,
-      'WorldWideAndWebReactFEPipeline',
+      'helpmycase-react-ui-pipeline',
       {
-        pipelineName: 'WorldWideAndWebReactFEPipeline',
+        pipelineName: 'helpmycase-react-ui-pipeline',
         crossAccountKeys: false,
         stages: [sourceStage, buildStage],
       }

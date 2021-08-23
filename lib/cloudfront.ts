@@ -5,7 +5,7 @@ import * as origin from '@aws-cdk/aws-cloudfront-origins';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as cdk from '@aws-cdk/core';
 
-export class WorldWideAndWebStorybookCloudfront extends cdk.Stack {
+export class Cloudfront extends cdk.Stack {
   constructor(
     scope: cdk.Construct,
     id: string,
@@ -15,16 +15,16 @@ export class WorldWideAndWebStorybookCloudfront extends cdk.Stack {
     super(scope, id, props);
 
     const arn =
-      'arn:aws:acm:us-east-1:460234074473:certificate/40df4d7e-f98e-4975-9181-4f20dddcc3b7';
+      'arn:aws:acm:us-east-1:460234074473:certificate/06f87d32-b4c3-41d4-90a8-46b07d2bfc0f';
 
     new cloudfront.Distribution(
       this,
-      'Worldwideandweb Cloudfront Distribution',
+      'Helpmycase Cloudfront Distribution',
       {
-        domainNames: ['app.worldwideandweb.com'],
+        domainNames: ['solicitors.helpmycase.co.uk'],
         certificate: cm.Certificate.fromCertificateArn(
           this,
-          'WWW Certificate',
+          'Helpmycase Certificate',
           arn
         ),
         defaultBehavior: {

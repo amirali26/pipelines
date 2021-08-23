@@ -1,8 +1,8 @@
 {
-  "name": "worldwideandweb-be",
+  "name": "pipelines",
   "version": "0.1.0",
   "bin": {
-    "worldwideandweb-be": "bin/worldwideandweb-be.js"
+    "main.ts": "bin/main.js"
   },
   "scripts": {
     "build": "tsc",
@@ -14,7 +14,6 @@
     "@aws-cdk/assert": "1.85.0",
     "@types/jest": "^26.0.22",
     "@types/node": "10.17.27",
-    "aws-cdk": "1.85.0",
     "jest": "^26.4.2",
     "ts-jest": "^26.5.4",
     "ts-node": "^9.0.0",

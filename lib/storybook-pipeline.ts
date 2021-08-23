@@ -9,7 +9,7 @@ import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
 import * as role from '@aws-cdk/aws-iam';
 import * as cdk from '@aws-cdk/core';
 
-export class WorldWideAndWebStorybookCodeArtifact extends cdk.Stack {
+export class StorybookCodeArtifactPipeline extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -29,21 +29,21 @@ export class WorldWideAndWebStorybookCodeArtifact extends cdk.Stack {
       })
     );
 
-    const domain = new codeartifact.CfnDomain(
+    new codeartifact.CfnDomain(
       this,
-      'WorldWideAndWebCodeArtifactDomain',
+      'helpmycase-codeartifact-domain',
       {
-        domainName: 'worldwideandweb',
+        domainName: 'helpmycase',
       }
     );
 
     // Codebuild
-    const project = new PipelineProject(this, 'WorldWideAndWebStorybook', {
-      projectName: 'WorldWideAndWebStorybook',
+    const project = new PipelineProject(this, 'helpmycase-storybook-project', {
+      projectName: 'helpmycase-storybook',
       environment: {
         buildImage: LinuxBuildImage.STANDARD_5_0,
       },
-      role: codeartifactRole,
+      role: codeartifactRole as any,
       buildSpec: BuildSpec.fromSourceFilename('buildspec.yaml'),
       environmentVariables: {
         
@@ -53,7 +53,7 @@ export class WorldWideAndWebStorybookCodeArtifact extends cdk.Stack {
     // Actions
     const gitHubAction = new codepipelineAction.GitHubSourceAction({
       actionName: 'githubSourceAction',
-      owner: 'worldwideandweb',
+      owner: 'handlemycase',
       repo: 'storybook',
       // @ts-ignore
       oauthToken: cdk.SecretValue.secretsManager(
@@ -68,7 +68,7 @@ export class WorldWideAndWebStorybookCodeArtifact extends cdk.Stack {
     });
 
     const codebuildAction = new codepipelineAction.CodeBuildAction({
-      actionName: 'WorldWideAndWebStorybook',
+      actionName: 'helpmycase-storybook',
       project: project,
       input: sourceOutput,
     });
@@ -86,8 +86,8 @@ export class WorldWideAndWebStorybookCodeArtifact extends cdk.Stack {
     };
 
     // Pipeline
-    new codepipeline.Pipeline(this, 'WorldWideAndWebReactStorybookPipeline', {
-      pipelineName: 'WorldWideAndWebReactStorybookPipeline',
+    new codepipeline.Pipeline(this, 'helpmycase-storybook-pipeline', {
+      pipelineName: 'helpmycase-storybook-pipeline',
       crossAccountKeys: false,
       stages: [sourceStage, buildStage],
     });

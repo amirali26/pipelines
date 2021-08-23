@@ -4,7 +4,7 @@ import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
 import * as cdk from '@aws-cdk/core';
 import * as role from '@aws-cdk/aws-iam';
 
-export class worldwideandwebCognitoPipeline extends cdk.Stack {
+export class CognitoPipeline extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
@@ -18,17 +18,17 @@ export class worldwideandwebCognitoPipeline extends cdk.Stack {
             actions: ['*'],
         }));
 
-        const codeBuildProject = new codebuild.PipelineProject(this, 'worldwideandweb-cognito-codebuildproject', {
-            projectName: 'worldwideandweb-cognitocodebuild',
+        const codeBuildProject = new codebuild.PipelineProject(this, 'helpmycase-cognito-codebuildproject', {
+            projectName: 'helpmycase-cognitocodebuild',
             buildSpec: codebuild.BuildSpec.fromSourceFilename('buildspec.yaml'),
-            role: _role,
+            role: _role as any,
         });
 
         const sourceOutput = new codepipeline.Artifact();
 
         // Github source action
         const sourceAction = new codepipelineAction.GitHubSourceAction({
-            actionName: 'worldwideandweb-cognitopipelinesourceaction',
+            actionName: 'helpmycase-cognitopipelinesourceaction',
             //@ts-ignore
             oauthToken: cdk.SecretValue.secretsManager(
                 'arn:aws:secretsmanager:eu-west-1:460234074473:secret:github_personal_access_token-HSIOq3',
@@ -36,7 +36,7 @@ export class worldwideandwebCognitoPipeline extends cdk.Stack {
                     jsonField: 'value',
                 }
             ),
-            owner: 'worldwideandweb',
+            owner: 'case',
             repo: 'cognito',
             output: sourceOutput,
             branch: 'master',
@@ -44,7 +44,7 @@ export class worldwideandwebCognitoPipeline extends cdk.Stack {
 
         // Build phase
         const buildAction = new codepipelineAction.CodeBuildAction({
-            actionName: 'worldwideandweb-stackbuild',
+            actionName: 'helpmycase-stackbuild',
             project: codeBuildProject,
             input: sourceOutput,
         });
@@ -62,9 +62,9 @@ export class worldwideandwebCognitoPipeline extends cdk.Stack {
         // Pipeline
         new codepipeline.Pipeline(
             this,
-            'worldwideandweb-cognitopipeline',
+            'helpmycase-cognitopipeline',
             {
-                pipelineName: 'worldwideandweb-cognito-pipeline',
+                pipelineName: 'helpmycase-cognito-pipeline',
                 crossAccountKeys: false,
                 stages: [sourceStage, buildStage],
             }
