@@ -4,6 +4,7 @@ import 'source-map-support/register';
 import { CertificateManager } from '../lib/certificate-manager';
 import { Cloudfront } from '../lib/cloudfront';
 import { CognitoPipeline } from '../lib/cognito-pipeline';
+import { DynamoTables } from '../lib/express-setup';
 import { FrontendPipeline } from '../lib/frontend-pipeline';
 import { StorybookCodeArtifactPipeline } from '../lib/storybook-pipeline';
 
@@ -34,4 +35,5 @@ new Cloudfront(
   s3Role,
   { env: envEuWest1 }
 );
-new CognitoPipeline(app, 'HandleMyCaseCognitoPipeline', {env: envEuWest1});
+new CognitoPipeline(app, 'HandleMyCaseCognitoPipeline', { env: envEuWest1 });
+new DynamoTables(app, 'HandleMyCaseDynamoTables', { env: envEuWest1 });
