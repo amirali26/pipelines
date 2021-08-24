@@ -1,5 +1,6 @@
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as cdk from '@aws-cdk/core';
+import { RemovalPolicy } from '@aws-cdk/core';
 
 export class DynamoTables extends cdk.Stack {
   constructor(
@@ -15,6 +16,7 @@ export class DynamoTables extends cdk.Stack {
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     const userProfiles = new dynamodb.Table(this, 'userProfiles', {
@@ -22,11 +24,33 @@ export class DynamoTables extends cdk.Stack {
         name: 'id',
         type: dynamodb.AttributeType.STRING
       },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
+    const userAccounts = new dynamodb.Table(this, 'userAccounts', {
+      partitionKey: {
+        name: 'accountId',
+        type: dynamodb.AttributeType.STRING
+      },
+      sortKey: {
+        name: 'userId',
+        type: dynamodb.AttributeType.STRING
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
+    userAccounts.addGlobalSecondaryIndex({
+      indexName: 'userId#AccountId',
+      partitionKey: {
+        name: 'userId',
+        type: dynamodb.AttributeType.STRING
+      },
       sortKey: {
         name: 'accountId',
         type: dynamodb.AttributeType.STRING
       },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 
     const accountPermissions = new dynamodb.Table(this, 'accountPermissions', {
@@ -35,13 +59,16 @@ export class DynamoTables extends cdk.Stack {
         type: dynamodb.AttributeType.STRING
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
+
     const accountProfiles = new dynamodb.Table(this, 'accountProfiles', {
       partitionKey: {
         name: 'id',
         type: dynamodb.AttributeType.STRING
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     const requestSubmission = new dynamodb.Table(this, 'requestSubmissions', {
@@ -54,6 +81,7 @@ export class DynamoTables extends cdk.Stack {
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
 
     requestSubmission.addLocalSecondaryIndex({
@@ -74,6 +102,7 @@ export class DynamoTables extends cdk.Stack {
         type: dynamodb.AttributeType.STRING
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: RemovalPolicy.DESTROY,
     });
   }
 }
