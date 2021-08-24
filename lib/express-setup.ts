@@ -42,7 +42,7 @@ export class DynamoTables extends cdk.Stack {
     });
 
     userAccounts.addGlobalSecondaryIndex({
-      indexName: 'userId#AccountId',
+      indexName: 'userId-AccountId',
       partitionKey: {
         name: 'userId',
         type: dynamodb.AttributeType.STRING
