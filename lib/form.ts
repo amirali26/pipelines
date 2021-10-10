@@ -22,6 +22,9 @@ export class FormStack extends cdk.Stack {
             projectName: 'helpmycase-formcodebuild',
             buildSpec: codebuild.BuildSpec.fromSourceFilename('buildspec.yaml'),
             role: _role as any,
+            environment: {
+                privileged: true
+            }
         });
 
         const sourceOutput = new codepipeline.Artifact();
