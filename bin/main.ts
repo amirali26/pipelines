@@ -6,7 +6,7 @@ import { Cloudfront } from '../lib/cloudfront';
 import { CognitoPipeline } from '../lib/cognito-pipeline';
 import { DynamoTables } from '../lib/express-setup';
 import { FormStack } from '../lib/form';
-import { FormContainerisation } from '../lib/form-containerisation';
+import { FormContainerisation } from '../lib/form-container-registry';
 import { FrontendPipeline } from '../lib/frontend-pipeline';
 import { LambdaFunctions } from '../lib/lambda-functions';
 import { StorybookCodeArtifactPipeline } from '../lib/storybook-pipeline';
@@ -40,6 +40,6 @@ new Cloudfront(
 );
 new CognitoPipeline(app, 'HandleMyCaseCognitoPipeline', { env: envEuWest1 });
 new FormContainerisation(app, 'HandleMyCaseFormContainerisation', { env: envEuWest1 });
-new FormStack(app, 'HandleMyCaseFormPipeline', { env: envEuWest1 });
+new FormStack(app, 'HandleMyCaseForm', { env: envEuWest1 });
 const lambdaFunctions = new LambdaFunctions(app, 'HandleMyCaseLambdaFunctions', { env: envEuWest1 });
 new DynamoTables(app, 'HandleMyCaseDynamoTables', lambdaFunctions.createRequestLambda, { env: envEuWest1 });
