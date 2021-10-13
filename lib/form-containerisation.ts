@@ -4,7 +4,7 @@ import * as elbv2 from '@aws-cdk/aws-elasticloadbalancingv2';
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import * as cm from '@aws-cdk/aws-certificatemanager';
-import { Duration, NestedStackProps } from '@aws-cdk/core';
+import { Duration, listValidator, NestedStackProps } from '@aws-cdk/core';
 
 export class FormECSContainer extends cdk.NestedStack {
     constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, props?: NestedStackProps) {
@@ -26,7 +26,7 @@ export class FormECSContainer extends cdk.NestedStack {
         });
 
         const cluster = new ecs.Cluster(this, 'FormsBackendCluster', {
-            vpc: vpc as any
+            vpc: vpc as any,
         });
 
         const service = new ecs.FargateService(this, 'Formsbackend-service', {
@@ -38,22 +38,29 @@ export class FormECSContainer extends cdk.NestedStack {
             internetFacing: true,
         });
 
+        lb.addRedirect();
 
-        const certificate = cm.Certificate.fromCertificateArn(this, '443 Certificate', 'arn:aws:acm:eu-west-1:460234074473:certificate/e425bca7-a5e5-48b7-8b5f-c8ed48356e45');
+        const certificate = cm.Certificate.fromCertificateArn(
+            this, '443 Certificate',
+            'arn:aws:acm:eu-west-1:460234074473:certificate/e425bca7-a5e5-48b7-8b5f-c8ed48356e45'
+        );
         const listener = lb.addListener('Formsbackend-listener', {
             open: true,
             port: 443,
             certificates: [certificate],
         });
 
+
         listener.addTargets('Formsbackend-targetgroup', {
-            port: 443,
+            port: 80,
+            protocol: elbv2.ApplicationProtocol.HTTP,
             targets: [service as any],
             healthCheck: {
                 enabled: true,
                 path: '/',
                 interval: cdk.Duration.minutes(1) as any,
                 timeout: Duration.seconds(30) as any,
+                unhealthyThresholdCount: 10,
             }
         });
     }
