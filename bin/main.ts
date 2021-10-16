@@ -3,6 +3,7 @@ import * as cdk from '@aws-cdk/core';
 import 'source-map-support/register';
 import { Cloudfront } from '../lib/cloudfront';
 import { CognitoPipeline } from '../lib/cognito-pipeline';
+import { DashboardContainerisation } from '../lib/dashboard-container-registry';
 import { DynamoTables } from '../lib/express-setup';
 import { FormContainerisation } from '../lib/form-container-registry';
 import { LambdaFunctions } from '../lib/lambda-functions';
@@ -49,6 +50,10 @@ new Pipeline(app, 'HandleMyCaseBePipeline', {
   projectName: 'helpmycase-backend-forms',
   repo: 'forms-backend'
 }, { env: envEuWest1 });
+new Pipeline(app, 'HandleMyCaseDashboardBePipeline', {
+  projectName: 'helpmycase-backend-dashboard',
+  repo: 'graphql-backend'
+}, { env: envEuWest1 });
 new CognitoPipeline(app, 'HandleMyCaseCognitoPipeline', { env: envEuWest1 });
 new StorybookCodeArtifactPipeline(app,'HandleMyCaseStorybookPipeline',{ env: envEuWest1 });
 
@@ -66,6 +71,7 @@ new Cloudfront( app, 'HandleMyCaseCloudfront-forms', formsStack.s3Role!, ['forms
 
 */
 new FormContainerisation(app, 'HandleMyCaseFormContainerisation', { env: envEuWest1 });
+new DashboardContainerisation(app, 'HandleMyCaseDashboardContainerisation', { env: envEuWest1 });
 
 /*
 
