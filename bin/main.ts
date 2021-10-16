@@ -27,7 +27,7 @@ const feStack = new Pipeline(app, 'HandleMyCaseFePipeline', {
       value: 'helpmycase-frontend',
     },
     DISTRIBUTION: {
-      value: 'E2JZVXD8021PJ2',
+      value: 'E2JW4YZGPM7CG0',
     }
   },
   repo: 'react-ui',
@@ -40,7 +40,7 @@ const formsStack = new Pipeline(app, 'HandleMyCaseFeFormsPipeline', {
       value: 'helpmycase-frontend-forms',
     },
     DISTRIBUTION: {
-      value: 'E2JZVXD8021PJ2',
+      value: 'EEB6LEHZLF875',
     }
   },
   repo: 'forms-ui'
@@ -58,7 +58,7 @@ new StorybookCodeArtifactPipeline(app,'HandleMyCaseStorybookPipeline',{ env: env
 
 */
 new Cloudfront( app, 'HandleMyCaseCloudfront-frontend', feStack.s3Role!, ['solicitor.helpmycase.co.uk'], { env: envEuWest1 });
-new Cloudfront( app, 'HandleMyCaseCloudfront-forms', formsStack.s3Role!, ['forms.api.helpmycase.co.uk'], { env: envEuWest1 });
+new Cloudfront( app, 'HandleMyCaseCloudfront-forms', formsStack.s3Role!, ['forms.helpmycase.co.uk'], { env: envEuWest1 });
 
 /*
 

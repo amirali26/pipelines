@@ -1,14 +1,24 @@
+import * as cm from '@aws-cdk/aws-certificatemanager';
+import * as ec2 from '@aws-cdk/aws-ec2';
 import * as ecr from '@aws-cdk/aws-ecr';
 import * as ecs from '@aws-cdk/aws-ecs';
 import * as elbv2 from '@aws-cdk/aws-elasticloadbalancingv2';
 import * as cdk from '@aws-cdk/core';
-import * as ec2 from '@aws-cdk/aws-ec2';
-import * as cm from '@aws-cdk/aws-certificatemanager';
-import { Duration, listValidator, NestedStackProps } from '@aws-cdk/core';
+import * as role from '@aws-cdk/aws-iam';
+import { Duration, NestedStackProps } from '@aws-cdk/core';
 
 export class FormECSContainer extends cdk.NestedStack {
     constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, props?: NestedStackProps) {
         super(scope, id, props);
+
+        const taskRole = new role.Role(this, 'taskRole', {
+            assumedBy: new role.ServicePrincipal('ecs-tasks.amazonaws.com'),
+        });
+
+        taskRole.addToPolicy(new role.PolicyStatement({
+            resources: ['*'],
+            actions: ['*']
+        }));
 
         const vpc = new ec2.Vpc(this, 'Formsbackend-vpc');
         vpc.selectSubnets({
@@ -17,6 +27,7 @@ export class FormECSContainer extends cdk.NestedStack {
 
         const taskDefinition = new ecs.FargateTaskDefinition(this, 'Formsbackend-fargattaskdefinition', {
             memoryLimitMiB: 1024,
+            taskRole: taskRole as any,
         });
         const container = taskDefinition.addContainer('FormsBackendContainer', {
             image: ecs.EcrImage.fromEcrRepository(repository as any),

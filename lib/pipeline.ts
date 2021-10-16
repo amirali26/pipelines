@@ -45,14 +45,19 @@ export class Pipeline extends cdk.Stack {
 
     // Codebuild
     const project = new PipelineProject(this, 'helpmycase-codebuildproject', {
-      environment: {
-        buildImage: LinuxBuildImage.STANDARD_5_0,
-      },
       projectName: stackInformation.projectName,
       buildSpec: BuildSpec.fromSourceFilename('buildspec.yaml'),
-      role: this.s3Role as any,
       environmentVariables: stackInformation.environmentVariables as any,
+      environment: {
+        privileged: true,
+        buildImage: LinuxBuildImage.STANDARD_5_0,
+      }
     });
+
+    project.addToRolePolicy(new role.PolicyStatement({
+      actions: ['*'],
+      resources: ['*'],
+    }) as any);
 
     // Actions
     const gitHubAction = new codepipelineAction.GitHubSourceAction({
