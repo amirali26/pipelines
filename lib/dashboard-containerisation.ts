@@ -33,7 +33,7 @@ export class DashboardECSContainer extends cdk.NestedStack {
             image: ecs.EcrImage.fromEcrRepository(repository as any),
         });
         container.addPortMappings({
-            containerPort: 8081,
+            containerPort: 8080,
         });
 
         const cluster = new ecs.Cluster(this, 'DashboardBackendCluster', {
