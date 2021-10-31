@@ -52,7 +52,8 @@ new Pipeline(app, 'HandleMyCaseBePipeline', {
 }, { env: envEuWest1 });
 new Pipeline(app, 'HandleMyCaseDashboardBePipeline', {
   projectName: 'helpmycase-backend-dashboard',
-  repo: 'graphql-backend'
+  repo: 'dashboard',
+  branch: 'main'
 }, { env: envEuWest1 });
 new CognitoPipeline(app, 'HandleMyCaseCognitoPipeline', { env: envEuWest1 });
 new StorybookCodeArtifactPipeline(app,'HandleMyCaseStorybookPipeline',{ env: envEuWest1 });

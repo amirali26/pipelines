@@ -20,7 +20,9 @@ export class FormECSContainer extends cdk.NestedStack {
             actions: ['*']
         }));
 
-        const vpc = new ec2.Vpc(this, 'Formsbackend-vpc');
+        const vpc = new ec2.Vpc(this, 'Formsbackend-vpc', {
+            natGateways: 0,
+        });
         vpc.selectSubnets({
             subnetType: ec2.SubnetType.PUBLIC,
         });

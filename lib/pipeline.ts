@@ -10,6 +10,7 @@ type TStackInformation = {
   repo: string,
   bucketName?: string,
   environmentVariables?: Record<string, Record<string, string>>;
+  branch?: string
 }
 export class Pipeline extends cdk.Stack {
   public s3Role: s3.Bucket | undefined;
@@ -72,7 +73,7 @@ export class Pipeline extends cdk.Stack {
         }
       ),
       output: sourceOutput,
-      branch: 'master',
+      branch: stackInformation.branch || 'master',
       trigger: codepipelineAction.GitHubTrigger.WEBHOOK,
     });
 

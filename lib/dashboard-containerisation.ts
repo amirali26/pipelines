@@ -8,7 +8,7 @@ import * as role from '@aws-cdk/aws-iam';
 import { Duration, NestedStackProps } from '@aws-cdk/core';
 
 export class DashboardECSContainer extends cdk.NestedStack {
-    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, props?: NestedStackProps) {
+    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, vpc: ec2.Vpc, props?: NestedStackProps) {
         super(scope, id, props);
 
         const taskRole = new role.Role(this, 'taskRole', {
@@ -19,11 +19,6 @@ export class DashboardECSContainer extends cdk.NestedStack {
             resources: ['*'],
             actions: ['*']
         }));
-
-        const vpc = new ec2.Vpc(this, 'Dashboardbackend-vpc');
-        vpc.selectSubnets({
-            subnetType: ec2.SubnetType.PUBLIC,
-        });
 
         const taskDefinition = new ecs.FargateTaskDefinition(this, 'Dashboardbackend-fargattaskdefinition', {
             memoryLimitMiB: 1024,
@@ -43,9 +38,10 @@ export class DashboardECSContainer extends cdk.NestedStack {
         const service = new ecs.FargateService(this, 'Dashboardbackend-service', {
             cluster,
             taskDefinition,
+            assignPublicIp: true,
         });
         const lb = new elbv2.ApplicationLoadBalancer(this, 'Dashboardbackend-applicationloadbalancer', {
-            vpc,
+            vpc: vpc,
             internetFacing: true,
         });
 
@@ -67,8 +63,7 @@ export class DashboardECSContainer extends cdk.NestedStack {
             protocol: elbv2.ApplicationProtocol.HTTP,
             targets: [service as any],
             healthCheck: {
-                enabled: true,
-                path: '/',
+                path: '/health',
                 interval: cdk.Duration.minutes(1) as any,
                 timeout: Duration.seconds(30) as any,
                 unhealthyThresholdCount: 10,
