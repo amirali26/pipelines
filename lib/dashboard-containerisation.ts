@@ -8,7 +8,7 @@ import * as role from '@aws-cdk/aws-iam';
 import { Duration, NestedStackProps } from '@aws-cdk/core';
 
 export class DashboardECSContainer extends cdk.NestedStack {
-    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, vpc: ec2.Vpc, props?: NestedStackProps) {
+    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, vpc: ec2.Vpc, sg: ec2.SecurityGroup, props?: NestedStackProps) {
         super(scope, id, props);
 
         const taskRole = new role.Role(this, 'taskRole', {
@@ -34,6 +34,7 @@ export class DashboardECSContainer extends cdk.NestedStack {
         const cluster = new ecs.Cluster(this, 'DashboardBackendCluster', {
             vpc: vpc as any,
         });
+
 
         const service = new ecs.FargateService(this, 'Dashboardbackend-service', {
             cluster,
@@ -69,5 +70,7 @@ export class DashboardECSContainer extends cdk.NestedStack {
                 unhealthyThresholdCount: 10,
             }
         });
+
+        sg.connections.allowFrom(service as any, ec2.Port.allTcp(), 'cluster access');
     }
 }

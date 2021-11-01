@@ -20,14 +20,12 @@ export class DashboardContainerisation extends cdk.Stack {
             cidr: '10.1.0.128/27',
         });
 
-        const sg = new ec2.SecurityGroup(this, 'public security group', {
+        const sg = new ec2.SecurityGroup(this, 'rds-security-group', {
             vpc,
             allowAllOutbound: true,
         });
 
-        sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.allTraffic());
-
-        new DashboardECSContainer(this, 'HandleMyCaseEcsSetup', repository, vpc);
-        new DashboardDatabase(this, 'HandleMyCaseDashboardSetup', vpc);
+        new DashboardECSContainer(this, 'HandleMyCaseEcsSetup', repository, vpc, sg);
+        new DashboardDatabase(this, 'HandleMyCaseDashboardSetup', vpc, sg);
     }
 }

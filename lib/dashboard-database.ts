@@ -3,7 +3,7 @@ import * as ec2 from '@aws-cdk/aws-ec2';
 import * as rds from '@aws-cdk/aws-rds';
 
 export class DashboardDatabase extends cdk.NestedStack {
-    constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, props?: cdk.NestedStackProps) {
+    constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, sg: ec2.SecurityGroup, props?: cdk.NestedStackProps) {
         super(scope, id, props);
 
         const instance = new rds.DatabaseInstance(this, 'Instance', {
@@ -16,7 +16,8 @@ export class DashboardDatabase extends cdk.NestedStack {
             vpc: vpc as any,
             vpcSubnets: {
                 subnetType: ec2.SubnetType.PUBLIC
-            }
+            },
+            securityGroups: [sg as any]
         });
     }
 }
