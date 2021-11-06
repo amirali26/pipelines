@@ -17,7 +17,12 @@ export class DashboardDatabase extends cdk.NestedStack {
             vpcSubnets: {
                 subnetType: ec2.SubnetType.PUBLIC
             },
-            securityGroups: [sg as any]
+        });
+
+        instance.addProxy('dashboard-proxy', {
+            secrets: [instance.secret as any],
+            vpc: vpc as any,
+            securityGroups: [sg as any],
         });
     }
 }
