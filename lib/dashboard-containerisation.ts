@@ -5,10 +5,11 @@ import * as ecs from '@aws-cdk/aws-ecs';
 import * as elbv2 from '@aws-cdk/aws-elasticloadbalancingv2';
 import * as cdk from '@aws-cdk/core';
 import * as role from '@aws-cdk/aws-iam';
-import { Duration, NestedStackProps } from '@aws-cdk/core';
+import { Duration, StackProps } from '@aws-cdk/core';
 
-export class DashboardECSContainer extends cdk.NestedStack {
-    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, vpc: ec2.Vpc, sg: ec2.SecurityGroup, props?: NestedStackProps) {
+export class DashboardECSContainer extends cdk.Stack {
+    public sg: ec2.SecurityGroup;
+    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, vpc: ec2.Vpc, props?: StackProps) {
         super(scope, id, props);
 
         const taskRole = new role.Role(this, 'taskRole', {
@@ -71,6 +72,12 @@ export class DashboardECSContainer extends cdk.NestedStack {
             }
         });
 
-        sg.connections.allowFrom(service as any, ec2.Port.allTcp(), 'cluster access');
+        this.sg = new ec2.SecurityGroup(this, 'rds-security-group', {
+            vpc,
+            allowAllOutbound: true,
+        });
+
+        this.sg.connections.allowFrom(service as any, ec2.Port.allTcp(), 'cluster access');
+        this.sg.addIngressRule(ec2.Peer.ipv4(vpc.isolatedSubnets[0].ipv4CidrBlock), ec2.Port.allTcp(), 'Lambda');
     }
 }

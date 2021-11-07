@@ -1,19 +1,23 @@
-import * as mysql from 'mysql';
+import * as mysql from 'mysql2/promise';
 
-const connection = mysql.createConnection({
-  host: 'dashboard-proxy.proxy-ceqnxwq4gaxl.eu-west-1.rds.amazonaws.com',
-  user: 'syscdk',
-  password: 'AO.whdlhF8FBiZ=.bWL05BhDlhhDmo',
-  database: 'main',
-});
-
-connection.connect();
+let connection: mysql.Connection;
 
 exports.handler = async function (event: any) {
   try {
     const id = event.userName;
+
+    console.log(JSON.stringify(event));
+
     const { name, phone_number, email, birthdate } =
       event.request.userAttributes;
+
+    connection = await mysql.createConnection({
+      host: 'dashboard-proxy.proxy-ceqnxwq4gaxl.eu-west-1.rds.amazonaws.com',
+      user: 'syscdk',
+      password: 'ON9sNtP^NhcGRD2=Tpz_OgO0dFg,9B',
+      database: 'main',
+    });
+    
     await addUser(id, name, phone_number, email, birthdate);
     return event;
   } catch (e: any) {
@@ -22,14 +26,10 @@ exports.handler = async function (event: any) {
 };
 
 const addUser = async (id: string, name: string, phone_number: string, email: string, birthdate: string): Promise<void> => {
-  connection.query(`INSERT into Users (ExternalId, Name, 
+  await connection.query(`INSERT into Users (ExternalId, Name, 
     DateOfBirth, PhoneNumber, Email) values (
       ${id}, ${name}, ${birthdate}, ${phone_number}, ${phone_number},
       ${email}
-    )`, (error) => {
-    if (error) {
-      console.log(error.code, error.message);
-    }
-  })
+    )`);
 }
   

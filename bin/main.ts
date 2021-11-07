@@ -3,8 +3,10 @@ import * as cdk from '@aws-cdk/core';
 import 'source-map-support/register';
 import { Cloudfront } from '../lib/cloudfront';
 import { HandleMyCaseCognitoStack } from '../lib/cognito';
-import { CognitoPipeline } from '../lib/cognito-pipeline';
-import { DashboardContainerisation } from '../lib/dashboard-container-registry';
+import { DashboardRegistry } from '../lib/dashboard-container-registry';
+import { DashboardECSContainer } from '../lib/dashboard-containerisation';
+import { DashboardDatabase } from '../lib/dashboard-database';
+import { DashboardVPC } from '../lib/dashboard-vpc';
 import { DynamoTables } from '../lib/express-setup';
 import { FormContainerisation } from '../lib/form-container-registry';
 import { LambdaFunctions } from '../lib/lambda-functions';
@@ -12,7 +14,6 @@ import { Pipeline } from '../lib/pipeline';
 import { StorybookCodeArtifactPipeline } from '../lib/storybook-pipeline';
 
 const envEuWest1 = { account: '460234074473', region: 'eu-west-1' };
-const envUsEast1 = { account: '460234074473', region: 'us-east-1' };
 
 const app = new cdk.App();
 
@@ -68,18 +69,28 @@ new Cloudfront( app, 'HandleMyCaseCloudfront-forms', formsStack.s3Role!, ['forms
 
 /*
 
+  VPCs
+
+*/
+const dashboardVPC = new DashboardVPC(app, 'HandleMyCaseDashboardVpc', { env: envEuWest1 });
+
+/*
+
   CONTAINERISATION
 
 */
 new FormContainerisation(app, 'HandleMyCaseFormContainerisation', { env: envEuWest1 });
-new DashboardContainerisation(app, 'HandleMyCaseDashboardContainerisation', { env: envEuWest1 });
+
+const dashboardRegistry = new DashboardRegistry(app, 'HandleMyCaseDashboardRegistry', { env: envEuWest1 });
+const dashboardECSContainer = new DashboardECSContainer(app, 'HandleMyCaseEcsSetup', dashboardRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
+new DashboardDatabase(app, 'HandleMyCaseDashboardDatabaseSetup', dashboardVPC.vpc, dashboardECSContainer.sg, { env: envEuWest1 });
 
 /*
 
   COGNITO
 
 */
-new HandleMyCaseCognitoStack(app, 'HandleMyCaseCognitoStack', {env: envEuWest1});
+new HandleMyCaseCognitoStack(app, 'HandleMyCaseCognitoStack', dashboardVPC.vpc,  {env: envEuWest1});
 
 /*
 

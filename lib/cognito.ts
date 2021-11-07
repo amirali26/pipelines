@@ -1,14 +1,19 @@
 import * as cognito from '@aws-cdk/aws-cognito';
 import * as lambda from '@aws-cdk/aws-lambda-nodejs';
 import * as cdk from '@aws-cdk/core';
+import * as ec2 from '@aws-cdk/aws-ec2';
 export class HandleMyCaseCognitoStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const postConfirmationTrigger = new lambda.NodejsFunction(this as any, 'postConfirmationTrigger', {
-      entry: 'lambda/postConfirmationTrigger/index.ts',
+      entry: 'lambda/PostConfirmationTrigger/index.ts',
       bundling: {
         minify: true,
+      },
+      vpc: vpc as any,
+      vpcSubnets: {
+        subnets: [vpc.isolatedSubnets[0] as any]
       },
     });
 
@@ -51,7 +56,7 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
       }
     });
 
-    const client = _cognito.addClient('frontend-client-react', {
+    _cognito.addClient('frontend-client-react', {
       preventUserExistenceErrors: true,
       authFlows: {
         userPassword: true,
