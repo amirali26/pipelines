@@ -69,7 +69,7 @@ export class DashboardECSContainer extends cdk.Stack {
                 interval: cdk.Duration.minutes(1) as any,
                 timeout: Duration.seconds(30) as any,
                 unhealthyThresholdCount: 10,
-            }
+            },
         });
 
         this.sg = new ec2.SecurityGroup(this, 'rds-security-group', {

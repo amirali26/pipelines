@@ -1,3 +1,5 @@
+
+const verifyEmail = require('../email-templates/verify-email.json');
 import * as cognito from '@aws-cdk/aws-cognito';
 import * as lambda from '@aws-cdk/aws-lambda-nodejs';
 import * as cdk from '@aws-cdk/core';
@@ -21,9 +23,10 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
       userPoolName: 'helpmycase-userpool',
       selfSignUpEnabled: true,
       userVerification: {
-        emailSubject: 'HelpMyCase - Please verify your email',
-        emailBody: 'Hello {username}, Thanks for signing up for a HelpMyCase account. To continue, please verify your email address using the following code: Your verification code is {####} ',
+        emailSubject: verifyEmail.Template.SubjectPart,
+        emailBody: verifyEmail.Template.HtmlPart,
         emailStyle: cognito.VerificationEmailStyle.CODE,
+        smsMessage: 'Your Helpmycase code is {####}. Never share this code with anybody.'
       },
       signInAliases: {
         email: true,
@@ -53,7 +56,7 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
           required: true,
           mutable: true,
         }
-      }
+      },
     });
 
     _cognito.addClient('frontend-client-react', {
@@ -74,5 +77,13 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
         cognito.UserPoolClientIdentityProvider.COGNITO
       ],
     });
+
+    const cognitoCfn = _cognito.node.defaultChild as cognito.CfnUserPool;
+    cognitoCfn.emailConfiguration = {
+      emailSendingAccount: 'DEVELOPER',
+      sourceArn: 'arn:aws:ses:eu-west-1:460234074473:identity/info@helpmycase.co.uk',
+      from: 'info@helpmycase.co.uk',
+      replyToEmailAddress: 'info@helpmycase.co.uk'
+    }
   }
 }
