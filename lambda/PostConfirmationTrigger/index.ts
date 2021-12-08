@@ -27,7 +27,7 @@ exports.handler = async function (event: any) {
 
 const addUser = async (id: string, name: string, phone_number: string, email: string, birthdate: string): Promise<void> => {
   const query = `INSERT into Users (ExternalId, Name, 
-    DateOfBirth, PhoneNumber, Email) values ('${id}', '${name}', '${birthdate}', '${phone_number}', '${email}')`;
+    DateOfBirth, PhoneNumber, Email, CreatedAt) values ('${id}', '${name}', '${birthdate}', '${phone_number}', '${email}', NOW())`;
   
   console.log(query);
 
