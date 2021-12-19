@@ -7,6 +7,7 @@ import { DashboardRegistry } from '../lib/dashboard-container-registry';
 import { DashboardECSContainer } from '../lib/dashboard-containerisation';
 import { DashboardDatabase } from '../lib/dashboard-database';
 import { DashboardVPC } from '../lib/dashboard-vpc';
+import { EmailService } from '../lib/email-services';
 import { DynamoTables } from '../lib/express-setup';
 import { FormContainerisation } from '../lib/form-container-registry';
 import { LambdaFunctions } from '../lib/lambda-functions';
@@ -84,6 +85,14 @@ new FormContainerisation(app, 'HandleMyCaseFormContainerisation', { env: envEuWe
 const dashboardRegistry = new DashboardRegistry(app, 'HandleMyCaseDashboardRegistry', { env: envEuWest1 });
 const dashboardECSContainer = new DashboardECSContainer(app, 'HandleMyCaseEcsSetup', dashboardRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
 new DashboardDatabase(app, 'HandleMyCaseDashboardDatabaseSetup', dashboardVPC.vpc, dashboardECSContainer.sg, { env: envEuWest1 });
+
+/*
+
+  EMAIL SERVICES
+
+*/
+new EmailService(app, 'HandleMyCaseEmailService', { env: envEuWest1 });
+
 
 /*
 
