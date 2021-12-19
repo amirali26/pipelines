@@ -32,4 +32,14 @@ async function sendEnquirySubmissionEmail(body: EnquirySubmissionEmail) {
             email: body.RequestEmail,
         })
     }).promise();
+    await ses.sendTemplatedEmail({
+        Destination: {
+            ToAddresses: [body.RequestEmail]
+        },
+        Source: sourceEmail,
+        Template: "HelpMyCase-EnquiryReceived",
+        TemplateData: JSON.stringify({
+            email: body.RequestEmail,
+        })
+    }).promise();
 }
