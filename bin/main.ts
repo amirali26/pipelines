@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import * as cdk from '@aws-cdk/core';
 import 'source-map-support/register';
+import { HandleMyCaseClientCognito } from '../lib/client-cognito';
 import { Cloudfront } from '../lib/cloudfront';
 import { HandleMyCaseCognitoStack } from '../lib/cognito';
 import { DashboardRegistry } from '../lib/dashboard-container-registry';
@@ -100,6 +101,7 @@ new EmailService(app, 'HandleMyCaseEmailService', { env: envEuWest1 });
 
 */
 new HandleMyCaseCognitoStack(app, 'HandleMyCaseCognitoStack', dashboardVPC.vpc,  {env: envEuWest1});
+new HandleMyCaseClientCognito(app, 'HandleMyCaseClientCognitoStack', dashboardVPC.vpc,  {env: envEuWest1});
 
 /*
 
