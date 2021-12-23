@@ -47,5 +47,5 @@ async function sendMessage(phoneNumber: string, secretLoginCode: string) {
         Message: `Your Helpmycase verification code is: ${secretLoginCode}`,
         Subject: 'Helpmycase Verification Code',
     };
-    await sns.publish().promise();
+    await sns.publish(params).promise();
 }

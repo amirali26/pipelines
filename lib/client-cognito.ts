@@ -4,6 +4,7 @@ import * as cognito from '@aws-cdk/aws-cognito';
 import * as lambda from '@aws-cdk/aws-lambda-nodejs';
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
+import * as iam from '@aws-cdk/aws-iam';
 export class HandleMyCaseClientCognito extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -62,6 +63,13 @@ export class HandleMyCaseClientCognito extends cdk.Stack {
         subnets: [vpc.isolatedSubnets[0] as any]
       },
     });
+
+    const policy = new iam.PolicyStatement({
+      actions: ['sns:Publish'],
+      resources: ['*']
+    });
+
+    createAuthChallenge.addToRolePolicy(policy as any);
 
     const _cognito = new cognito.UserPool(this, 'helpmycase-client-userpool', {
       userPoolName: 'helpmycase-client-userpool',
