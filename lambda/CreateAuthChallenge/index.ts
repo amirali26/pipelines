@@ -8,15 +8,15 @@ import { SNS } from 'aws-sdk';
 const sns = new SNS();
 
 export const handler: CreateAuthChallengeTriggerHandler = async event => {
-
+    console.log(event);
     let secretLoginCode: string;
     if (!event.request.session || !event.request.session.length) {
 
         // This is a new auth session
         // Generate a new secret login code and mail it to the user
         secretLoginCode = randomDigits(6).join('');
-        await sendMessage(event.request.userAttributes.phoneNumber, secretLoginCode);
-
+        const response = await sendMessage(event.request.userAttributes['phone_number'], secretLoginCode);
+        console.log(response);
     } else {
 
         // There's an existing session. Don't generate new digits but
@@ -42,10 +42,12 @@ export const handler: CreateAuthChallengeTriggerHandler = async event => {
 };
 
 async function sendMessage(phoneNumber: string, secretLoginCode: string) {
+    console.log(phoneNumber);
     const params: SNS.PublishInput = {
         PhoneNumber: phoneNumber,
         Message: `Your Helpmycase verification code is: ${secretLoginCode}`,
         Subject: 'Helpmycase Verification Code',
     };
-    await sns.publish(params).promise();
+    
+    return await sns.publish(params).promise();
 }

@@ -5,6 +5,7 @@ import * as lambda from '@aws-cdk/aws-lambda-nodejs';
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import * as iam from '@aws-cdk/aws-iam';
+import { Duration } from '@aws-cdk/core';
 export class HandleMyCaseClientCognito extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -14,20 +15,12 @@ export class HandleMyCaseClientCognito extends cdk.Stack {
       bundling: {
         minify: true,
       },
-      vpc: vpc as any,
-      vpcSubnets: {
-        subnets: [vpc.isolatedSubnets[0] as any]
-      },
     });
 
     const defineAuthChallenge = new lambda.NodejsFunction(this as any, 'defineAuthChallenge', {
       entry: 'lambda/DefineAuthChallenge/index.ts',
       bundling: {
         minify: true,
-      },
-      vpc: vpc as any,
-      vpcSubnets: {
-        subnets: [vpc.isolatedSubnets[0] as any]
       },
     });
     
@@ -36,20 +29,12 @@ export class HandleMyCaseClientCognito extends cdk.Stack {
       bundling: {
         minify: true,
       },
-      vpc: vpc as any,
-      vpcSubnets: {
-        subnets: [vpc.isolatedSubnets[0] as any]
-      },
     });
 
     const preSignUp = new lambda.NodejsFunction(this as any, 'preSignUp', {
       entry: 'lambda/PreSignUp/index.ts',
       bundling: {
         minify: true,
-      },
-      vpc: vpc as any,
-      vpcSubnets: {
-        subnets: [vpc.isolatedSubnets[0] as any]
       },
     });
 
@@ -58,18 +43,21 @@ export class HandleMyCaseClientCognito extends cdk.Stack {
       bundling: {
         minify: true,
       },
-      vpc: vpc as any,
-      vpcSubnets: {
-        subnets: [vpc.isolatedSubnets[0] as any]
-      },
+      timeout: Duration.seconds(15) as any,
     });
 
-    const policy = new iam.PolicyStatement({
+    const createAuthChallengePolicy = new iam.PolicyStatement({
       actions: ['sns:Publish'],
       resources: ['*']
     });
 
-    createAuthChallenge.addToRolePolicy(policy as any);
+    const postAuthenticationPolicy = new iam.PolicyStatement({
+      actions: ['cognito-idp:AdminUpdateUserAttributes'],
+      resources: ['*']
+    });
+
+    createAuthChallenge.addToRolePolicy(createAuthChallengePolicy as any);
+    postAuthentication.addToRolePolicy(postAuthenticationPolicy as any);
 
     const _cognito = new cognito.UserPool(this, 'helpmycase-client-userpool', {
       userPoolName: 'helpmycase-client-userpool',
@@ -115,6 +103,7 @@ export class HandleMyCaseClientCognito extends cdk.Stack {
       authFlows: {
         userPassword: true,
         userSrp: true,
+        custom: true,
       },
       oAuth: {
         callbackUrls: ['http://localhost:3000'],
