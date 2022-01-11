@@ -3,7 +3,7 @@ import * as ec2 from '@aws-cdk/aws-ec2';
 import * as rds from '@aws-cdk/aws-rds';
 
 export class DashboardDatabase extends cdk.Stack {
-    constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, sg: ec2.SecurityGroup, props?: cdk.StackProps) {
+    constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, sg: ec2.SecurityGroup, clientSg: ec2.SecurityGroup, props?: cdk.StackProps) {
         super(scope, id, props);
 
         const instance = new rds.DatabaseInstance(this, 'Instance', {
@@ -22,7 +22,7 @@ export class DashboardDatabase extends cdk.Stack {
         instance.addProxy('dashboard-proxy', {
             secrets: [instance.secret as any],
             vpc: vpc as any,
-            securityGroups: [sg as any],
+            securityGroups: [sg as any, clientSg as any],
             requireTLS: false,
         });
     }

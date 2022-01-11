@@ -5,10 +5,11 @@ import * as ecs from '@aws-cdk/aws-ecs';
 import * as elbv2 from '@aws-cdk/aws-elasticloadbalancingv2';
 import * as cdk from '@aws-cdk/core';
 import * as role from '@aws-cdk/aws-iam';
-import { Duration, NestedStackProps } from '@aws-cdk/core';
+import { Duration, StackProps } from '@aws-cdk/core';
 
-export class FormECSContainer extends cdk.NestedStack {
-    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, props?: NestedStackProps) {
+export class ClientECSContainer extends cdk.Stack {
+    public sg: ec2.SecurityGroup;
+    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, vpc: ec2.Vpc, props?: StackProps) {
         super(scope, id, props);
 
         const taskRole = new role.Role(this, 'taskRole', {
@@ -20,34 +21,30 @@ export class FormECSContainer extends cdk.NestedStack {
             actions: ['*']
         }));
 
-        const vpc = new ec2.Vpc(this, 'Formsbackend-vpc', {
-            natGateways: 0,
-        });
-        vpc.selectSubnets({
-            subnetType: ec2.SubnetType.PUBLIC,
-        });
-
-        const taskDefinition = new ecs.FargateTaskDefinition(this, 'Formsbackend-fargattaskdefinition', {
+        const taskDefinition = new ecs.FargateTaskDefinition(this, 'Clientbackend-fargattaskdefinition', {
             memoryLimitMiB: 1024,
             taskRole: taskRole as any,
         });
-        const container = taskDefinition.addContainer('FormsBackendContainer', {
+        const container = taskDefinition.addContainer('ClientBackendContainer', {
             image: ecs.EcrImage.fromEcrRepository(repository as any),
+            logging: ecs.LogDriver.awsLogs({ streamPrefix: 'clientbackend'  })
         });
         container.addPortMappings({
-            containerPort: 8081,
+            containerPort: 8080,
         });
 
-        const cluster = new ecs.Cluster(this, 'FormsBackendCluster', {
+        const cluster = new ecs.Cluster(this, 'ClientBackendCluster', {
             vpc: vpc as any,
         });
 
-        const service = new ecs.FargateService(this, 'Formsbackend-service', {
+
+        const service = new ecs.FargateService(this, 'Clientbackend-service', {
             cluster,
             taskDefinition,
+            assignPublicIp: true,
         });
-        const lb = new elbv2.ApplicationLoadBalancer(this, 'Formsbackend-applicationloadbalancer', {
-            vpc,
+        const lb = new elbv2.ApplicationLoadBalancer(this, 'Clientbackend-applicationloadbalancer', {
+            vpc: vpc,
             internetFacing: true,
         });
 
@@ -57,24 +54,31 @@ export class FormECSContainer extends cdk.NestedStack {
             this, '443 Certificate',
             'arn:aws:acm:eu-west-1:460234074473:certificate/e425bca7-a5e5-48b7-8b5f-c8ed48356e45'
         );
-        const listener = lb.addListener('Formsbackend-listener', {
+        const listener = lb.addListener('Clientbackend-listener', {
             open: true,
             port: 443,
             certificates: [certificate],
         });
 
 
-        listener.addTargets('Formsbackend-targetgroup', {
+        listener.addTargets('Clientbackend-targetgroup', {
             port: 80,
             protocol: elbv2.ApplicationProtocol.HTTP,
             targets: [service as any],
             healthCheck: {
-                enabled: true,
-                path: '/',
+                path: '/health',
                 interval: cdk.Duration.minutes(1) as any,
                 timeout: Duration.seconds(30) as any,
                 unhealthyThresholdCount: 10,
-            }
+            },
         });
+
+        this.sg = new ec2.SecurityGroup(this, 'rds-security-group', {
+            vpc,
+            allowAllOutbound: true,
+        });
+
+        this.sg.connections.allowFrom(service as any, ec2.Port.allTcp(), 'cluster access');
+        this.sg.addIngressRule(ec2.Peer.ipv4(vpc.isolatedSubnets[0].ipv4CidrBlock), ec2.Port.allTcp(), 'Lambda');
     }
 }

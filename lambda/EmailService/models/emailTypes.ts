@@ -1,5 +1,6 @@
 export enum EmailTypes {
-    ENQUIRY_SUBMISSION = 'EnquirySubmission'
+    ENQUIRY_SUBMISSION = 'EnquirySubmission',
+    FIRM_INVITATION = 'FirmInvitation',
 }
 
 export type EmailBody = {
@@ -8,4 +9,4 @@ export type EmailBody = {
 
 export type EnquirySubmissionEmail = EmailBody & {
     RequestEmail: string,
-}
+} & Record<string, unknown>

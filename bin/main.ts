@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 import * as cdk from '@aws-cdk/core';
 import 'source-map-support/register';
+import { BackendCodeArtifact } from '../lib/backend-code-artifact';
 import { HandleMyCaseClientCognito } from '../lib/client-cognito';
+import { DashboardRegistry } from '../lib/client-container-registry';
+import { ClientECSContainer } from '../lib/client-containerisation';
 import { Cloudfront } from '../lib/cloudfront';
 import { HandleMyCaseCognitoStack } from '../lib/cognito';
-import { DashboardRegistry } from '../lib/dashboard-container-registry';
+import { ClientRegistry } from '../lib/dashboard-container-registry';
 import { DashboardECSContainer } from '../lib/dashboard-containerisation';
 import { DashboardDatabase } from '../lib/dashboard-database';
 import { DashboardVPC } from '../lib/dashboard-vpc';
 import { EmailService } from '../lib/email-services';
 import { DynamoTables } from '../lib/express-setup';
-import { FormContainerisation } from '../lib/form-container-registry';
 import { LambdaFunctions } from '../lib/lambda-functions';
 import { Pipeline } from '../lib/pipeline';
 import { StorybookCodeArtifactPipeline } from '../lib/storybook-pipeline';
@@ -37,6 +39,19 @@ const feStack = new Pipeline(app, 'HandleMyCaseFePipeline', {
   },
   repo: 'react-ui',
 }, { env: envEuWest1 });
+const clientFeStack = new Pipeline(app, 'HandleMyCaseClientFePipeline', {
+  bucketName: 'helpmycase-client-frontend',
+  projectName: 'helpmycase-client-react-ui',
+  environmentVariables: {
+    DEPLOY_BUCKET: {
+      value: 'helpmycase-client-frontend',
+    },
+    DISTRIBUTION: {
+      value: 'E3D58X39VNDER4',
+    }
+  },
+  repo: 'clientFrontend',
+}, { env: envEuWest1 });
 const formsStack = new Pipeline(app, 'HandleMyCaseFeFormsPipeline', {
   bucketName: 'helpmycase-frontend-forms',
   projectName: 'helpmycase-forms-ui',
@@ -57,9 +72,21 @@ new Pipeline(app, 'HandleMyCaseBePipeline', {
 new Pipeline(app, 'HandleMyCaseDashboardBePipeline', {
   projectName: 'helpmycase-backend-dashboard',
   repo: 'dashboard',
-  branch: 'main'
+  branch: 'master'
 }, { env: envEuWest1 });
-new StorybookCodeArtifactPipeline(app,'HandleMyCaseStorybookPipeline',{ env: envEuWest1 });
+new Pipeline(app, 'HandleMyCaseDashboardClientBePipeline', {
+  projectName: 'helpmycase-backend-client',
+  repo: 'client',
+  branch: 'master'
+}, { env: envEuWest1 });
+new StorybookCodeArtifactPipeline(app, 'HandleMyCaseStorybookPipeline', { env: envEuWest1 });
+
+/*
+
+  Code Artifact backend
+
+*/
+new BackendCodeArtifact(app, 'HandleMyCaseBackendCodeArtifact', { env: envEuWest1 }); 
 
 /*
 
@@ -68,6 +95,7 @@ new StorybookCodeArtifactPipeline(app,'HandleMyCaseStorybookPipeline',{ env: env
 */
 new Cloudfront( app, 'HandleMyCaseCloudfront-frontend', feStack.s3Role!, ['solicitor.helpmycase.co.uk'], { env: envEuWest1 });
 new Cloudfront( app, 'HandleMyCaseCloudfront-forms', formsStack.s3Role!, ['forms.helpmycase.co.uk'], { env: envEuWest1 });
+new Cloudfront( app, 'HandleMyCaseCloudfront-clientfrontend', clientFeStack.s3Role!, ['client.helpmycase.co.uk'], { env: envEuWest1 });
 
 /*
 
@@ -81,11 +109,22 @@ const dashboardVPC = new DashboardVPC(app, 'HandleMyCaseDashboardVpc', { env: en
   CONTAINERISATION
 
 */
-new FormContainerisation(app, 'HandleMyCaseFormContainerisation', { env: envEuWest1 });
+const clientRegistry  = new ClientRegistry(app, 'HandleMyCaseClientRegistry', { env: envEuWest1 });
+const clientECSContainer = new ClientECSContainer(app, 'HandleMyCaseClientEcsSetup', clientRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
 
 const dashboardRegistry = new DashboardRegistry(app, 'HandleMyCaseDashboardRegistry', { env: envEuWest1 });
 const dashboardECSContainer = new DashboardECSContainer(app, 'HandleMyCaseEcsSetup', dashboardRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
-new DashboardDatabase(app, 'HandleMyCaseDashboardDatabaseSetup', dashboardVPC.vpc, dashboardECSContainer.sg, { env: envEuWest1 });
+new DashboardDatabase(
+  app,
+  'HandleMyCaseDashboardDatabaseSetup',
+  dashboardVPC.vpc,
+  dashboardECSContainer.sg,
+  clientECSContainer.sg,
+  { env: envEuWest1 }
+);
+
+
+
 
 /*
 
