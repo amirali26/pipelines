@@ -110,16 +110,14 @@ const dashboardVPC = new DashboardVPC(app, 'HandleMyCaseDashboardVpc', { env: en
 
 */
 const clientRegistry  = new ClientRegistry(app, 'HandleMyCaseClientRegistry', { env: envEuWest1 });
-const clientECSContainer = new ClientECSContainer(app, 'HandleMyCaseClientEcsSetup', clientRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
 
 const dashboardRegistry = new DashboardRegistry(app, 'HandleMyCaseDashboardRegistry', { env: envEuWest1 });
-const dashboardECSContainer = new DashboardECSContainer(app, 'HandleMyCaseEcsSetup', dashboardRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
+const dashboardECSContainer = new DashboardECSContainer(app, 'HandleMyCaseEcsSetup', dashboardRegistry.repository, clientRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
 new DashboardDatabase(
   app,
   'HandleMyCaseDashboardDatabaseSetup',
   dashboardVPC.vpc,
   dashboardECSContainer.sg,
-  clientECSContainer.sg,
   { env: envEuWest1 }
 );
 

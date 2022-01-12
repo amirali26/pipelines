@@ -9,7 +9,7 @@ import { Duration, StackProps } from '@aws-cdk/core';
 
 export class DashboardECSContainer extends cdk.Stack {
     public sg: ec2.SecurityGroup;
-    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, vpc: ec2.Vpc, props?: StackProps) {
+    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, clientRepository: ecr.Repository, vpc: ec2.Vpc, props?: StackProps) {
         super(scope, id, props);
 
         const taskRole = new role.Role(this, 'taskRole', {
@@ -21,6 +21,7 @@ export class DashboardECSContainer extends cdk.Stack {
             actions: ['*']
         }));
 
+        // Dashboard
         const taskDefinition = new ecs.FargateTaskDefinition(this, 'Dashboardbackend-fargattaskdefinition', {
             memoryLimitMiB: 1024,
             taskRole: taskRole as any,
@@ -29,6 +30,18 @@ export class DashboardECSContainer extends cdk.Stack {
             image: ecs.EcrImage.fromEcrRepository(repository as any),
         });
         container.addPortMappings({
+            containerPort: 8080,
+        });
+
+        // Client
+        const clientTaskDefinition = new ecs.FargateTaskDefinition(this, 'Clientbackend-fargattaskdefinition', {
+            memoryLimitMiB: 1024,
+            taskRole: taskRole as any,
+        });
+        const clientContainer = clientTaskDefinition.addContainer('ClientBackendContainer', {
+            image: ecs.EcrImage.fromEcrRepository(clientRepository as any),
+        });
+        clientContainer.addPortMappings({
             containerPort: 8080,
         });
 
@@ -42,6 +55,13 @@ export class DashboardECSContainer extends cdk.Stack {
             taskDefinition,
             assignPublicIp: true,
         });
+
+        const clientService = new ecs.FargateService(this, 'Clientbackend-service', {
+            cluster,
+            taskDefinition: clientTaskDefinition,
+            assignPublicIp: true,
+        });
+
         const lb = new elbv2.ApplicationLoadBalancer(this, 'Dashboardbackend-applicationloadbalancer', {
             vpc: vpc,
             internetFacing: true,
@@ -72,12 +92,29 @@ export class DashboardECSContainer extends cdk.Stack {
             },
         });
 
+        listener.addTargets('Clientbackend-targetgroup', {
+            port: 80,
+            protocol: elbv2.ApplicationProtocol.HTTP,
+            targets: [clientService as any],
+            priority: 10,
+            conditions: [
+                elbv2.ListenerCondition.hostHeaders(['client-api.helpmycase.co.uk'])
+            ],
+            healthCheck: {
+                path: '/health',
+                interval: cdk.Duration.minutes(1) as any,
+                timeout: Duration.seconds(30) as any,
+                unhealthyThresholdCount: 10,
+            },
+        });
+
         this.sg = new ec2.SecurityGroup(this, 'rds-security-group', {
             vpc,
             allowAllOutbound: true,
         });
 
         this.sg.connections.allowFrom(service as any, ec2.Port.allTcp(), 'cluster access');
+        this.sg.connections.allowFrom(clientService as any, ec2.Port.allTcp(), 'client cluster access');
         this.sg.addIngressRule(ec2.Peer.ipv4(vpc.isolatedSubnets[0].ipv4CidrBlock), ec2.Port.allTcp(), 'Lambda');
     }
 }
