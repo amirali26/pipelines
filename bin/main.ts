@@ -4,7 +4,6 @@ import 'source-map-support/register';
 import { BackendCodeArtifact } from '../lib/backend-code-artifact';
 import { HandleMyCaseClientCognito } from '../lib/client-cognito';
 import { DashboardRegistry } from '../lib/client-container-registry';
-import { ClientECSContainer } from '../lib/client-containerisation';
 import { Cloudfront } from '../lib/cloudfront';
 import { HandleMyCaseCognitoStack } from '../lib/cognito';
 import { ClientRegistry } from '../lib/dashboard-container-registry';
@@ -78,6 +77,16 @@ new Pipeline(app, 'HandleMyCaseDashboardClientBePipeline', {
   projectName: 'helpmycase-backend-client',
   repo: 'client',
   branch: 'master'
+}, { env: envEuWest1 });
+new Pipeline(app, 'HandleMyCaseApiDatabaseModelsPipeline', {
+  projectName: 'helpmycase-backend-api-database-models',
+  repo: 'Api.Database.Models',
+  branch: 'main'
+}, { env: envEuWest1 });
+new Pipeline(app, 'HandleMyCaseApiDatabaseMySqlPipeline', {
+  projectName: 'helpmycase-backend-database-mysql',
+  repo: 'Api.Database.MySql',
+  branch: 'main'
 }, { env: envEuWest1 });
 new StorybookCodeArtifactPipeline(app, 'HandleMyCaseStorybookPipeline', { env: envEuWest1 });
 
