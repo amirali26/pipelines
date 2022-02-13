@@ -1,6 +1,7 @@
 export enum EmailTypes {
     ENQUIRY_SUBMISSION = 'EnquirySubmission',
     FIRM_INVITATION = 'FirmInvitation',
+    REQUEST_SUBMISSION = 'RequestSubmission'
 }
 
 export type EmailBody = {
