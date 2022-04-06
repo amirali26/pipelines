@@ -16,7 +16,7 @@ import { LambdaFunctions } from '../lib/lambda-functions';
 import { Pipeline } from '../lib/pipeline';
 import { StorybookCodeArtifactPipeline } from '../lib/storybook-pipeline';
 
-const envEuWest1 = { account: '460234074473', region: 'eu-west-1' };
+const envEuWest1 = { account: '619680812856', region: 'eu-west-1' };
 
 const app = new cdk.App();
 

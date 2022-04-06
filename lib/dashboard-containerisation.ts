@@ -71,7 +71,7 @@ export class DashboardECSContainer extends cdk.Stack {
 
         const certificate = cm.Certificate.fromCertificateArn(
             this, '443 Certificate',
-            'arn:aws:acm:eu-west-1:460234074473:certificate/e425bca7-a5e5-48b7-8b5f-c8ed48356e45'
+            'arn:aws:acm:eu-west-1:619680812856:certificate/5c518fb2-306e-4d58-bca7-e90c991429c8'
         );
         const listener = lb.addListener('Dashboardbackend-listener', {
             open: true,

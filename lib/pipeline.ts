@@ -67,7 +67,7 @@ export class Pipeline extends cdk.Stack {
       repo: stackInformation.repo,
       // @ts-ignore
       oauthToken: cdk.SecretValue.secretsManager(
-        'arn:aws:secretsmanager:eu-west-1:460234074473:secret:github_personal_access_token-HSIOq3',
+        'arn:aws:secretsmanager:eu-west-1:619680812856:secret:github_personal_access_token-VyPJnu',
         {
           jsonField: 'value',
         }

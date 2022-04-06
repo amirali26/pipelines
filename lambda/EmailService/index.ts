@@ -22,6 +22,9 @@ exports.handler = async function (event: SQSEvent) {
         case (EmailTypes.REQUEST_SUBMISSION):
             await sendRequestSubmissionEmail(JSON.parse(queueInfo.body));
             return;
+        case (EmailTypes.FIRM_VERIFICATION):
+            await sendFirmVerification(JSON.parse(queueInfo.body));
+            return;
         default:
             throw Error('Invalid Message Group ID');
     }
@@ -73,6 +76,20 @@ async function sendAddedToFirmEmail(body: EnquirySubmissionEmail) {
         TemplateData: JSON.stringify({
             "firm_name": body.FirmName,
             url: 'https://localhost:3001/',
+        })
+    }).promise();
+}
+
+async function sendFirmVerification(body: EnquirySubmissionEmail) {
+    await ses.sendTemplatedEmail({
+        Destination: {
+            ToAddresses: [body.EmailAddress],
+        },
+        Source: sourceEmail,
+        Template: "HelpMyCase-FirmCreationVerification",
+        TemplateData: JSON.stringify({
+            "firm_name": body.FirmName,
+            "firm_id": body.VerificationId,
         })
     }).promise();
 }

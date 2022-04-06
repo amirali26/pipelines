@@ -15,7 +15,7 @@ export class Cloudfront extends cdk.Stack {
   ) {
     super(scope, id, props);
 
-    const arn = 'arn:aws:acm:us-east-1:460234074473:certificate/06f87d32-b4c3-41d4-90a8-46b07d2bfc0f';
+    const arn = 'arn:aws:acm:us-east-1:619680812856:certificate/2d184b4c-124c-4851-b7f5-c6559c78b53a';
 
     new cloudfront.Distribution(
       this,
