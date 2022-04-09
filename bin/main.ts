@@ -33,7 +33,7 @@ const feStack = new Pipeline(app, 'HandleMyCaseFePipeline', {
       value: 'helpmycase-frontend',
     },
     DISTRIBUTION: {
-      value: 'E2JW4YZGPM7CG0',
+      value: 'E17UK33V8NIZQQ',
     }
   },
   repo: 'react-ui',
@@ -46,7 +46,7 @@ const clientFeStack = new Pipeline(app, 'HandleMyCaseClientFePipeline', {
       value: 'helpmycase-client-frontend',
     },
     DISTRIBUTION: {
-      value: 'E3D58X39VNDER4',
+      value: 'E2LGWM386STR5H',
     }
   },
   repo: 'clientFrontend',
@@ -59,7 +59,7 @@ const formsStack = new Pipeline(app, 'HandleMyCaseFeFormsPipeline', {
       value: 'helpmycase-frontend-forms',
     },
     DISTRIBUTION: {
-      value: 'EEB6LEHZLF875',
+      value: 'EQSA4JI32JG9E',
     }
   },
   repo: 'forms-ui'
@@ -150,7 +150,7 @@ new HandleMyCaseCognitoStack(app, 'HandleMyCaseCognitoStack', dashboardVPC.vpc, 
 new HandleMyCaseClientCognito(app, 'HandleMyCaseClientCognitoStack', dashboardVPC.vpc,  {env: envEuWest1});
 
 /*
-
+§
   DYNAMO
 
 */
