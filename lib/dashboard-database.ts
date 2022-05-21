@@ -19,7 +19,7 @@ export class DashboardDatabase extends cdk.Stack {
             },
         });
 
-        instance.addProxy('dashboard-proxy', {
+        instance.addProxy(id + '-dashboard-proxy', {
             secrets: [instance.secret as any],
             vpc: vpc as any,
             securityGroups: [sg as any],

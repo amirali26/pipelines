@@ -1,3 +1,4 @@
+import AWS = require('aws-sdk');
 import * as mysql from 'mysql2/promise';
 
 let connection: mysql.Connection;
@@ -5,16 +6,15 @@ let connection: mysql.Connection;
 exports.handler = async function (event: any) {
   try {
     const id = event.userName;
-
     console.log(JSON.stringify(event));
 
     const { name, phone_number, email, birthdate } =
       event.request.userAttributes;
 
     connection = await mysql.createConnection({
-      host: 'dashboard-proxy.proxy-ceqnxwq4gaxl.eu-west-1.rds.amazonaws.com',
+      host: 'dashboard-proxy.proxy-c6bo4t75k909.eu-west-1.rds.amazonaws.com',
       user: 'syscdk',
-      password: 'ON9sNtP^NhcGRD2=Tpz_OgO0dFg,9B',
+      password: ',Zh,IKdf9B=4,Rcz37^QTwPQXAYjUY',
       database: 'main',
     });
     

@@ -60,7 +60,6 @@ export class HandleMyCaseClientCognito extends cdk.Stack {
     postAuthentication.addToRolePolicy(postAuthenticationPolicy as any);
 
     const _cognito = new cognito.UserPool(this, 'helpmycase-client-userpool', {
-      userPoolName: 'helpmycase-client-userpool',
       selfSignUpEnabled: true,
       userVerification: {
         emailSubject: verifyEmail.Template.SubjectPart,

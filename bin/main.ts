@@ -14,20 +14,31 @@ import { EmailService } from '../lib/email-services';
 import { DynamoTables } from '../lib/express-setup';
 import { LambdaFunctions } from '../lib/lambda-functions';
 import { Pipeline } from '../lib/pipeline';
+import { HandleMyCaseS3Stack } from '../lib/s3-buckets';
 import { StorybookCodeArtifactPipeline } from '../lib/storybook-pipeline';
 
-const envEuWest1 = { account: '619680812856', region: 'eu-west-1' };
 
 const app = new cdk.App();
+
+/*
+
+  S3 Buckets
+
+*/
+
+if (!process.env.ENV) throw Error("No environment variable has been set");
+const { prefix, accountId } = app.node.tryGetContext(process.env.ENV);
+const envEuWest1 = { account: accountId, region: 'eu-west-1' };
+const { imageUploadBucket } = new HandleMyCaseS3Stack(app, prefix + '-HandleMyCaseS3Buckets', { env: envEuWest1 });
 
 /*
 
   PIPELINES
 
 */
-const feStack = new Pipeline(app, 'HandleMyCaseFePipeline', {
-  bucketName: 'helpmycase-frontend',
-  projectName: 'helpmycase-react-ui',
+const feStack = new Pipeline(app, prefix + '-HandleMyCaseFePipeline', {
+  bucketName: prefix + '-helpmycase-frontend',
+  projectName: prefix + '-helpmycase-react-ui',
   environmentVariables: {
     DEPLOY_BUCKET: {
       value: 'helpmycase-frontend',
@@ -37,10 +48,11 @@ const feStack = new Pipeline(app, 'HandleMyCaseFePipeline', {
     }
   },
   repo: 'react-ui',
+  branch: prefix === 'prod' ? 'master' : 'dev',
 }, { env: envEuWest1 });
-const clientFeStack = new Pipeline(app, 'HandleMyCaseClientFePipeline', {
-  bucketName: 'helpmycase-client-frontend',
-  projectName: 'helpmycase-client-react-ui',
+const clientFeStack = new Pipeline(app, prefix + '-HandleMyCaseClientFePipeline', {
+  bucketName: prefix + '-helpmycase-client-frontend',
+  projectName: prefix + '-helpmycase-client-react-ui',
   environmentVariables: {
     DEPLOY_BUCKET: {
       value: 'helpmycase-client-frontend',
@@ -50,10 +62,11 @@ const clientFeStack = new Pipeline(app, 'HandleMyCaseClientFePipeline', {
     }
   },
   repo: 'clientFrontend',
+  branch: prefix === 'prod' ? 'master' : 'dev',
 }, { env: envEuWest1 });
-const formsStack = new Pipeline(app, 'HandleMyCaseFeFormsPipeline', {
-  bucketName: 'helpmycase-frontend-forms',
-  projectName: 'helpmycase-forms-ui',
+const formsStack = new Pipeline(app, prefix + '-HandleMyCaseFeFormsPipeline', {
+  bucketName: prefix + '-helpmycase-frontend-forms',
+  projectName: prefix + '-helpmycase-forms-ui',
   environmentVariables: {
     DEPLOY_BUCKET: {
       value: 'helpmycase-frontend-forms',
@@ -62,31 +75,28 @@ const formsStack = new Pipeline(app, 'HandleMyCaseFeFormsPipeline', {
       value: 'EQSA4JI32JG9E',
     }
   },
+  branch: prefix === 'prod' ? 'master' : 'dev',
   repo: 'forms-ui'
 }, { env: envEuWest1 });
-new Pipeline(app, 'HandleMyCaseBePipeline', {
-  projectName: 'helpmycase-backend-forms',
-  repo: 'forms-backend'
-}, { env: envEuWest1 });
-new Pipeline(app, 'HandleMyCaseDashboardBePipeline', {
-  projectName: 'helpmycase-backend-dashboard',
+new Pipeline(app, prefix + '-HandleMyCaseDashboardBePipeline', {
+  projectName: prefix + '-helpmycase-backend-dashboard',
   repo: 'dashboard',
-  branch: 'master'
+  branch: prefix === 'prod' ? 'master' : 'dev',
 }, { env: envEuWest1 });
-new Pipeline(app, 'HandleMyCaseDashboardClientBePipeline', {
-  projectName: 'helpmycase-backend-client',
+new Pipeline(app, prefix + '-HandleMyCaseDashboardClientBePipeline', {
+  projectName: prefix + '-helpmycase-backend-client',
   repo: 'client',
-  branch: 'master'
+  branch: prefix === 'prod' ? 'master' : 'dev',
 }, { env: envEuWest1 });
-new Pipeline(app, 'HandleMyCaseApiDatabaseModelsPipeline', {
-  projectName: 'helpmycase-backend-api-database-models',
+new Pipeline(app, prefix + '-HandleMyCaseApiDatabaseModelsPipeline', {
+  projectName: prefix + '-helpmycase-backend-api-database-models',
   repo: 'Api.Database.Models',
-  branch: 'main'
+  branch: prefix === 'prod' ? 'main' : 'dev',
 }, { env: envEuWest1 });
-new Pipeline(app, 'HandleMyCaseApiDatabaseMySqlPipeline', {
-  projectName: 'helpmycase-backend-database-mysql',
+new Pipeline(app, prefix + '-HandleMyCaseApiDatabaseMySqlPipeline', {
+  projectName: prefix + 'helpmycase-backend-database-mysql',
   repo: 'Api.Database.MySql',
-  branch: 'main'
+  branch: prefix === 'prod' ? 'main' : 'dev',
 }, { env: envEuWest1 });
 new StorybookCodeArtifactPipeline(app, 'HandleMyCaseStorybookPipeline', { env: envEuWest1 });
 
@@ -102,29 +112,29 @@ new BackendCodeArtifact(app, 'HandleMyCaseBackendCodeArtifact', { env: envEuWest
   CLOUDFRONT DISTRIBUTIONS
 
 */
-new Cloudfront( app, 'HandleMyCaseCloudfront-frontend', feStack.s3Role!, ['solicitor.helpmycase.co.uk'], { env: envEuWest1 });
-new Cloudfront( app, 'HandleMyCaseCloudfront-forms', formsStack.s3Role!, ['forms.helpmycase.co.uk'], { env: envEuWest1 });
-new Cloudfront( app, 'HandleMyCaseCloudfront-clientfrontend', clientFeStack.s3Role!, ['client.helpmycase.co.uk'], { env: envEuWest1 });
+new Cloudfront( app, prefix + '-HandleMyCaseCloudfront-frontend', feStack.s3Role!, [`${prefix === 'dev' ? 'dev-' : ''}solicitor.helpmycase.co.uk`], { env: envEuWest1 });
+new Cloudfront( app, prefix + '-HandleMyCaseCloudfront-forms', formsStack.s3Role!, [`${prefix === 'dev' ? 'dev-' : ''}forms.helpmycase.co.uk`], { env: envEuWest1 });
+new Cloudfront( app, prefix + '-HandleMyCaseCloudfront-clientfrontend', clientFeStack.s3Role!, [`${prefix === 'dev' ? 'dev-' : ''}client.helpmycase.co.uk`], { env: envEuWest1 });
 
 /*
 
   VPCs
 
 */
-const dashboardVPC = new DashboardVPC(app, 'HandleMyCaseDashboardVpc', { env: envEuWest1 });
+const dashboardVPC = new DashboardVPC(app, prefix + '-HandleMyCaseDashboardVpc', { env: envEuWest1 });
 
 /*
 
   CONTAINERISATION
 
 */
-const clientRegistry  = new ClientRegistry(app, 'HandleMyCaseClientRegistry', { env: envEuWest1 });
+const clientRegistry  = new ClientRegistry(app, prefix + '-HandleMyCaseClientRegistry', { env: envEuWest1 });
 
-const dashboardRegistry = new DashboardRegistry(app, 'HandleMyCaseDashboardRegistry', { env: envEuWest1 });
-const dashboardECSContainer = new DashboardECSContainer(app, 'HandleMyCaseEcsSetup', dashboardRegistry.repository, clientRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
+const dashboardRegistry = new DashboardRegistry(app, prefix + '-HandleMyCaseDashboardRegistry', { env: envEuWest1 });
+const dashboardECSContainer = new DashboardECSContainer(app, prefix + '-HandleMyCaseEcsSetup', dashboardRegistry.repository, clientRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
 new DashboardDatabase(
   app,
-  'HandleMyCaseDashboardDatabaseSetup',
+  prefix + '-HandleMyCaseDashboardDatabaseSetup',
   dashboardVPC.vpc,
   dashboardECSContainer.sg,
   { env: envEuWest1 }
@@ -138,7 +148,7 @@ new DashboardDatabase(
   EMAIL SERVICES
 
 */
-new EmailService(app, 'HandleMyCaseEmailService', { env: envEuWest1 });
+new EmailService(app, prefix + '-HandleMyCaseEmailService', { env: envEuWest1 });
 
 
 /*
@@ -146,13 +156,13 @@ new EmailService(app, 'HandleMyCaseEmailService', { env: envEuWest1 });
   COGNITO
 
 */
-new HandleMyCaseCognitoStack(app, 'HandleMyCaseCognitoStack', dashboardVPC.vpc,  {env: envEuWest1});
-new HandleMyCaseClientCognito(app, 'HandleMyCaseClientCognitoStack', dashboardVPC.vpc,  {env: envEuWest1});
+new HandleMyCaseCognitoStack(app, prefix + '-HandleMyCaseCognitoStack', dashboardVPC.vpc,  {env: envEuWest1});
+new HandleMyCaseClientCognito(app, prefix + '-HandleMyCaseClientCognitoStack', dashboardVPC.vpc,  {env: envEuWest1});
 
 /*
 §
   DYNAMO
 
 */
-const lambdaFunctions = new LambdaFunctions(app, 'HandleMyCaseLambdaFunctions', { env: envEuWest1 });
-new DynamoTables(app, 'HandleMyCaseDynamoTables', lambdaFunctions.createRequestLambda, { env: envEuWest1 });
+const lambdaFunctions = new LambdaFunctions(app, prefix + '-HandleMyCaseLambdaFunctions', imageUploadBucket, { env: envEuWest1 });
+new DynamoTables(app, prefix + '-HandleMyCaseDynamoTables', lambdaFunctions.createRequestLambda, { env: envEuWest1 });

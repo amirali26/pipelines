@@ -20,7 +20,6 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
     });
 
     const _cognito = new cognito.UserPool(this, 'helpmycase-userpool', {
-      userPoolName: 'helpmycase-userpool',
       selfSignUpEnabled: true,
       userVerification: {
         emailSubject: verifyEmail.Template.SubjectPart,
@@ -66,8 +65,6 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
         userSrp: true,
       },
       oAuth: {
-        callbackUrls: ['http://localhost:3000'],
-        logoutUrls: ['http://localhost:3000'],
         flows: {
           authorizationCodeGrant: true,
         },
