@@ -17,6 +17,7 @@ export class DashboardDatabase extends cdk.Stack {
             vpcSubnets: {
                 subnetType: ec2.SubnetType.PUBLIC
             },
+            databaseName: 'main',
         });
 
         instance.addProxy(id + '-dashboard-proxy', {

@@ -14,7 +14,7 @@ type TStackInformation = {
 }
 export class Pipeline extends cdk.Stack {
   public s3Role: s3.Bucket | undefined;
-  constructor(scope: cdk.Construct, id: string, stackInformation: TStackInformation, props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, stackInformation: TStackInformation, buildspecPath: string, environment: 'dev' | 'prod', props?: cdk.StackProps) {
     super(scope, id, props);
 
 
@@ -47,7 +47,7 @@ export class Pipeline extends cdk.Stack {
     // Codebuild
     const project = new PipelineProject(this, 'helpmycase-codebuildproject', {
       projectName: stackInformation.projectName,
-      buildSpec: BuildSpec.fromSourceFilename('buildspec.yaml'),
+      buildSpec: BuildSpec.fromSourceFilename(buildspecPath),
       environmentVariables: stackInformation.environmentVariables as any,
       environment: {
         privileged: true,

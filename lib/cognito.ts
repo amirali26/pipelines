@@ -4,14 +4,19 @@ import * as cognito from '@aws-cdk/aws-cognito';
 import * as lambda from '@aws-cdk/aws-lambda-nodejs';
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
+import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 export class HandleMyCaseCognitoStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, prefix: 'dev' | 'prod', props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const secret = secretsmanager.Secret.fromSecretCompleteArn(this, 'DatabaseSecret', prefix === 'dev' ? 'arn:aws:secretsmanager:eu-west-1:619680812856:secret:devHandleMyCaseDashboardDat-YcDXj7J0CAlm-fw4vyl' : 'arn:aws:secretsmanager:eu-west-1:619680812856:secret:prodHandleMyCaseDashboardDa-VOnQoDBOvG7m-LUpOAm');
     const postConfirmationTrigger = new lambda.NodejsFunction(this as any, 'postConfirmationTrigger', {
       entry: 'lambda/PostConfirmationTrigger/index.ts',
       bundling: {
         minify: true,
+      },
+      environment: {
+        NODE_ENV: prefix,
       },
       vpc: vpc as any,
       vpcSubnets: {
@@ -19,6 +24,7 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
       },
     });
 
+    secret.grantRead(postConfirmationTrigger as any);
     const _cognito = new cognito.UserPool(this, 'helpmycase-userpool', {
       selfSignUpEnabled: true,
       userVerification: {

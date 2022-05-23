@@ -3,18 +3,24 @@ import * as mysql from 'mysql2/promise';
 
 let connection: mysql.Connection;
 
+const client = new AWS.SecretsManager({
+  region: 'eu-west-1',
+});
+
 exports.handler = async function (event: any) {
   try {
     const id = event.userName;
-    console.log(JSON.stringify(event));
 
     const { name, phone_number, email, birthdate } =
       event.request.userAttributes;
-
+    
+    const connectionInformation = await client.getSecretValue({ SecretId: process.env.NODE_ENV === 'dev' ? 'devHandleMyCaseDashboardDat-YcDXj7J0CAlm' : 'prodHandleMyCaseDashboardDa-VOnQoDBOvG7m'}).promise();
+    console.log(JSON.stringify(connectionInformation));
+    const connectionInformationParsed = JSON.parse(connectionInformation.SecretString!);
     connection = await mysql.createConnection({
-      host: 'dashboard-proxy.proxy-c6bo4t75k909.eu-west-1.rds.amazonaws.com',
+      host: connectionInformationParsed.host!,
       user: 'syscdk',
-      password: ',Zh,IKdf9B=4,Rcz37^QTwPQXAYjUY',
+      password: connectionInformationParsed.password!,
       database: 'main',
     });
     
