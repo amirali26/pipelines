@@ -101,7 +101,7 @@ export class DashboardECSContainer extends cdk.Stack {
             targets: [clientService as any],
             priority: 10,
             conditions: [
-                elbv2.ListenerCondition.hostHeaders([prefix + '-client-api.helpmycase.co.uk'])
+                elbv2.ListenerCondition.hostHeaders([prefix === "dev" ? 'dev-client-api.helpmycase.co.uk' : 'client-api.helpmycase.co.uk'])
             ],
             healthCheck: {
                 path: '/health',
