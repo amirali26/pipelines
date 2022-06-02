@@ -6,7 +6,7 @@ import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 export class HandleMyCaseCognitoStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, prefix: 'dev' | 'prod', props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc,  sg: ec2.SecurityGroup, prefix: 'dev' | 'prod', props?: cdk.StackProps) {
     super(scope, id, props);
 
     const secret = secretsmanager.Secret.fromSecretCompleteArn(this, 'DatabaseSecret', prefix === 'dev' ? 'arn:aws:secretsmanager:eu-west-1:619680812856:secret:devHandleMyCaseDashboardDat-YcDXj7J0CAlm-fw4vyl' : 'arn:aws:secretsmanager:eu-west-1:619680812856:secret:prodHandleMyCaseDashboardDa-VOnQoDBOvG7m-LUpOAm');
@@ -17,14 +17,16 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
       },
       environment: {
         NODE_ENV: prefix,
+        HOST: secret.secretValueFromJson("host").toString(),
+        PASSWORD: secret.secretValueFromJson("password").toString(),
       },
       vpc: vpc as any,
       vpcSubnets: {
         subnets: [vpc.isolatedSubnets[0] as any]
       },
+      securityGroups: [sg as any],
     });
 
-    secret.grantRead(postConfirmationTrigger as any);
     const _cognito = new cognito.UserPool(this, 'helpmycase-userpool', {
       selfSignUpEnabled: true,
       userVerification: {

@@ -5,11 +5,12 @@ import * as ecs from '@aws-cdk/aws-ecs';
 import * as elbv2 from '@aws-cdk/aws-elasticloadbalancingv2';
 import * as cdk from '@aws-cdk/core';
 import * as role from '@aws-cdk/aws-iam';
+import * as logs from "@aws-cdk/aws-logs";
 import { Duration, StackProps } from '@aws-cdk/core';
 
 export class DashboardECSContainer extends cdk.Stack {
     public sg: ec2.SecurityGroup;
-    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, clientRepository: ecr.Repository, vpc: ec2.Vpc, props?: StackProps) {
+    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, clientRepository: ecr.Repository, vpc: ec2.Vpc, prefix: string, props?: StackProps) {
         super(scope, id, props);
 
         const taskRole = new role.Role(this, 'taskRole', {
@@ -28,6 +29,7 @@ export class DashboardECSContainer extends cdk.Stack {
         });
         const container = taskDefinition.addContainer('DashboardBackendContainer', {
             image: ecs.EcrImage.fromEcrRepository(repository as any),
+            logging: ecs.LogDriver.awsLogs({ streamPrefix: id + "-DashboardBackendContainer", logRetention: 3 })
         });
         container.addPortMappings({
             containerPort: 8080,
@@ -40,6 +42,7 @@ export class DashboardECSContainer extends cdk.Stack {
         });
         const clientContainer = clientTaskDefinition.addContainer('ClientBackendContainer', {
             image: ecs.EcrImage.fromEcrRepository(clientRepository as any),
+            logging: ecs.LogDriver.awsLogs({ streamPrefix: id + "-ClientBackendContainer", logRetention: 3 })
         });
         clientContainer.addPortMappings({
             containerPort: 8080,
@@ -98,7 +101,7 @@ export class DashboardECSContainer extends cdk.Stack {
             targets: [clientService as any],
             priority: 10,
             conditions: [
-                elbv2.ListenerCondition.hostHeaders(['client-api.helpmycase.co.uk'])
+                elbv2.ListenerCondition.hostHeaders([prefix + '-client-api.helpmycase.co.uk'])
             ],
             healthCheck: {
                 path: '/health',
@@ -106,6 +109,10 @@ export class DashboardECSContainer extends cdk.Stack {
                 timeout: Duration.seconds(30) as any,
                 unhealthyThresholdCount: 10,
             },
+        });
+
+        const clientLogGroup = new logs.LogGroup(this, "ClientLogGroup", {
+            retention: logs.RetentionDays.ONE_WEEK,
         });
 
         this.sg = new ec2.SecurityGroup(this, 'rds-security-group', {

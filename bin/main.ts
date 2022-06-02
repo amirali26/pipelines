@@ -45,6 +45,9 @@ const feStack = new Pipeline(app, prefix + '-HandleMyCaseFePipeline', {
     },
     DISTRIBUTION: {
       value: prefix === 'dev' ? 'E943HERUWBJ2A' : 'EE9K6I5X9TIPH',
+    },
+    APP_ENVIRONMENT: {
+      value: prefix
     }
   },
   repo: 'react-ui',
@@ -60,6 +63,9 @@ const clientFeStack = new Pipeline(app, prefix + '-HandleMyCaseClientFePipeline'
     },
     DISTRIBUTION: {
       value: prefix === 'dev' ? 'E3S9Z6RC45TIE9' : 'E3CZ8OG96X0L5Z',
+    },
+    APP_ENVIRONMENT: {
+      value: prefix
     }
   },
   repo: 'clientFrontend',
@@ -75,6 +81,9 @@ const formsStack = new Pipeline(app, prefix + '-HandleMyCaseFeFormsPipeline', {
     },
     DISTRIBUTION: {
       value: prefix === 'dev' ? 'ET5UL5O0T2BUO' : 'E26BK3PHTUP6GL',
+    },
+    APP_ENVIRONMENT: {
+      value: prefix
     }
   },
   branch: prefix === 'prod' ? 'master' : 'dev',
@@ -119,7 +128,7 @@ new Pipeline(app, 'HandleMyCaseApiDatabaseMySqlPipeline', {
 new StorybookCodeArtifactPipeline(app, 'HandleMyCaseStorybookPipeline', { env: envEuWest1 });
 
 /*
-
+n
   Code Artifact backend
 
 */
@@ -149,7 +158,7 @@ const dashboardVPC = new DashboardVPC(app, prefix + '-HandleMyCaseDashboardVpc',
 const clientRegistry  = new ClientRegistry(app, prefix + '-HandleMyCaseClientRegistry', { env: envEuWest1 });
 
 const dashboardRegistry = new DashboardRegistry(app, prefix + '-HandleMyCaseDashboardRegistry', { env: envEuWest1 });
-const dashboardECSContainer = new DashboardECSContainer(app, prefix + '-HandleMyCaseEcsSetup', dashboardRegistry.repository, clientRegistry.repository, dashboardVPC.vpc, { env: envEuWest1 });
+const dashboardECSContainer = new DashboardECSContainer(app, prefix + '-HandleMyCaseEcsSetup', dashboardRegistry.repository, clientRegistry.repository, dashboardVPC.vpc, prefix, { env: envEuWest1 });
 new DashboardDatabase(
   app,
   prefix + '-HandleMyCaseDashboardDatabaseSetup',
@@ -174,7 +183,7 @@ new EmailService(app, prefix + '-HandleMyCaseEmailService', { env: envEuWest1 })
   COGNITO
 
 */
-new HandleMyCaseCognitoStack(app, prefix + '-HandleMyCaseCognitoStack', dashboardVPC.vpc, prefix, {env: envEuWest1});
+new HandleMyCaseCognitoStack(app, prefix + '-HandleMyCaseCognitoStack', dashboardVPC.vpc, dashboardECSContainer.sg, prefix, {env: envEuWest1});
 new HandleMyCaseClientCognito(app, prefix + '-HandleMyCaseClientCognitoStack', dashboardVPC.vpc,  {env: envEuWest1});
 
 /*

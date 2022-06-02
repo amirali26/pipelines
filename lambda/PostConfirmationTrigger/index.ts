@@ -2,11 +2,6 @@ import AWS = require('aws-sdk');
 import * as mysql from 'mysql2/promise';
 
 let connection: mysql.Connection;
-
-const client = new AWS.SecretsManager({
-  region: 'eu-west-1',
-});
-
 exports.handler = async function (event: any) {
   try {
     const id = event.userName;
@@ -14,16 +9,12 @@ exports.handler = async function (event: any) {
     const { name, phone_number, email, birthdate } =
       event.request.userAttributes;
     
-    const connectionInformation = await client.getSecretValue({ SecretId: process.env.NODE_ENV === 'dev' ? 'devHandleMyCaseDashboardDat-YcDXj7J0CAlm' : 'prodHandleMyCaseDashboardDa-VOnQoDBOvG7m'}).promise();
-    console.log(JSON.stringify(connectionInformation));
-    const connectionInformationParsed = JSON.parse(connectionInformation.SecretString!);
-    connection = await mysql.createConnection({
-      host: connectionInformationParsed.host!,
+      connection = await mysql.createConnection({
+      host: process.env.HOST!,
       user: 'syscdk',
-      password: connectionInformationParsed.password!,
+      password: process.env.PASSWORD!,
       database: 'main',
     });
-    
     await addUser(id, name, phone_number, email, birthdate);
     return event;
   } catch (e: any) {
