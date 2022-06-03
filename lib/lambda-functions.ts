@@ -41,12 +41,7 @@ export class LambdaFunctions extends cdk.Stack {
         allowedOrigins: [prefix === 'dev' ? "https://dev-solicitor.helpmycase.co.uk" : "https://solicitor.helpmycase.co.uk"],
         allowedMethods: [lambdaBasic.HttpMethod.POST],
       }
-    })
-
-    this.createSignedUrl.addPermission("lambda-functionUrl-Invoke", {
-      principal: principal ,
-      action: "lambda:invokeFunctionUrl",
-    })
-    imageUploadBucket.grantPut(this.createSignedUrl );
+    });
+    imageUploadBucket.grantPut(this.createSignedUrl);
   }
 }
