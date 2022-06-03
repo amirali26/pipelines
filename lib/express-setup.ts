@@ -1,14 +1,12 @@
-import * as dynamodb from '@aws-cdk/aws-dynamodb';
-import { NodejsFunction } from '@aws-cdk/aws-lambda-nodejs';
-import * as cdk from '@aws-cdk/core';
-import { RemovalPolicy } from '@aws-cdk/core';
-import { LambdaFunctions } from './lambda-functions';
+import { aws_dynamodb as dynamodb, RemovalPolicy, aws_lambda_nodejs as lambda } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 
 export class DynamoTables extends cdk.Stack {
   constructor(
-    scope: cdk.Construct,
+    scope: Construct,
     id: string,
-    createRequestLambda: NodejsFunction,
+    createRequestLambda: lambda.NodejsFunction,
     props?: cdk.StackProps,
   ) {
     super(scope, id, props);
@@ -71,7 +69,7 @@ export class DynamoTables extends cdk.Stack {
       }
     });
 
-    table.grantWriteData(createRequestLambda as any);
+    table.grantWriteData(createRequestLambda);
 
     const areasOfLaw = new dynamodb.Table(this, 'areasOfLawTable', {
       partitionKey: {

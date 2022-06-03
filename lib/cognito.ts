@@ -1,16 +1,15 @@
 
 const verifyEmail = require('../email-templates/verify-email.json');
-import * as cognito from '@aws-cdk/aws-cognito';
-import * as lambda from '@aws-cdk/aws-lambda-nodejs';
-import * as cdk from '@aws-cdk/core';
-import * as ec2 from '@aws-cdk/aws-ec2';
-import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
+import { aws_secretsmanager as secretsmanager, aws_ec2 as ec2, aws_lambda_nodejs as lambda, aws_cognito as cognito  } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+
 export class HandleMyCaseCognitoStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc,  sg: ec2.SecurityGroup, prefix: 'dev' | 'prod', props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, vpc: ec2.Vpc,  sg: ec2.SecurityGroup, prefix: 'dev' | 'prod', props?: cdk.StackProps) {
     super(scope, id, props);
 
     const secret = secretsmanager.Secret.fromSecretCompleteArn(this, 'DatabaseSecret', prefix === 'dev' ? 'arn:aws:secretsmanager:eu-west-1:619680812856:secret:devHandleMyCaseDashboardDat-YcDXj7J0CAlm-fw4vyl' : 'arn:aws:secretsmanager:eu-west-1:619680812856:secret:prodHandleMyCaseDashboardDa-VOnQoDBOvG7m-LUpOAm');
-    const postConfirmationTrigger = new lambda.NodejsFunction(this as any, 'postConfirmationTrigger', {
+    const postConfirmationTrigger = new lambda.NodejsFunction(this , 'postConfirmationTrigger', {
       entry: 'lambda/PostConfirmationTrigger/index.ts',
       bundling: {
         minify: true,
@@ -20,11 +19,11 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
         HOST: secret.secretValueFromJson("host").toString(),
         PASSWORD: secret.secretValueFromJson("password").toString(),
       },
-      vpc: vpc as any,
+      vpc: vpc ,
       vpcSubnets: {
-        subnets: [vpc.isolatedSubnets[0] as any]
+        subnets: [vpc.isolatedSubnets[0] ]
       },
-      securityGroups: [sg as any],
+      securityGroups: [sg ],
     });
 
     const _cognito = new cognito.UserPool(this, 'helpmycase-userpool', {
@@ -52,7 +51,7 @@ export class HandleMyCaseCognitoStack extends cdk.Stack {
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       lambdaTriggers: {
-        postConfirmation: postConfirmationTrigger as any,
+        postConfirmation: postConfirmationTrigger ,
       },
       standardAttributes: {
         fullname: {

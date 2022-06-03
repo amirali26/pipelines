@@ -1,13 +1,9 @@
-import * as cm from '@aws-cdk/aws-certificatemanager';
-import * as cloudfront from '@aws-cdk/aws-cloudfront';
-import { AllowedMethods, ViewerProtocolPolicy } from '@aws-cdk/aws-cloudfront';
-import * as origin from '@aws-cdk/aws-cloudfront-origins';
-import * as s3 from '@aws-cdk/aws-s3';
-import * as cdk from '@aws-cdk/core';
-
+import { aws_certificatemanager as cm, aws_cloudfront as cf, aws_s3 as s3, aws_cloudfront_origins as origins  } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 export class Cloudfront extends cdk.Stack {
   constructor(
-    scope: cdk.Construct,
+    scope: Construct,
     id: string,
     s3Bucket: s3.Bucket,
     domainNames: string[],
@@ -17,16 +13,16 @@ export class Cloudfront extends cdk.Stack {
 
     const arn = 'arn:aws:acm:us-east-1:619680812856:certificate/2d184b4c-124c-4851-b7f5-c6559c78b53a';
 
-    new cloudfront.Distribution(
+    new cf.Distribution(
       this,
       'Helpmycase Cloudfront Distribution',
       {
         domainNames,
         certificate: cm.Certificate.fromCertificateArn(this, 'Helpmycase Certificate', arn),
         defaultBehavior: {
-          allowedMethods: AllowedMethods.ALLOW_ALL,
-          viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          origin: new origin.S3Origin(s3Bucket as any),
+          allowedMethods: cf.AllowedMethods.ALLOW_ALL,
+          viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          origin: new origins.S3Origin(s3Bucket),
         },
       }
     );

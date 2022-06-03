@@ -1,13 +1,11 @@
-import * as lambda from '@aws-cdk/aws-lambda-nodejs';
-import * as cdk from '@aws-cdk/core';
-import * as sqs from '@aws-cdk/aws-sqs';
-import * as iam from '@aws-cdk/aws-iam';
-import { SqsEventSource } from '@aws-cdk/aws-lambda-event-sources';
+import { aws_lambda_nodejs as lambda, aws_sqs as sqs, aws_iam as iam, aws_lambda_event_sources as les } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 
 export class EmailService extends cdk.Stack {
   
 constructor(
-    scope: cdk.Construct,
+    scope: Construct,
     id: string,
     props?: cdk.StackProps
   ) {
@@ -17,20 +15,20 @@ constructor(
         fifo: true,
     });
 
-    const emailLambda = new lambda.NodejsFunction(this as any, 'EmailService', {
+    const emailLambda = new lambda.NodejsFunction(this, 'EmailService', {
       entry: 'lambda/EmailService/index.ts',
       bundling: {
         minify: true,
       },
     });
 
-    emailLambda.addEventSource(new SqsEventSource(queue as any));
+    emailLambda.addEventSource(new les.SqsEventSource(queue));
     
     const policy = new iam.PolicyStatement({
         actions: ['ses:SendTemplatedEmail'],
         resources: ['*'],
     });
 
-    emailLambda.addToRolePolicy(policy as any);
+    emailLambda.addToRolePolicy(policy);
   }
 }

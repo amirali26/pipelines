@@ -1,16 +1,9 @@
-import * as cm from '@aws-cdk/aws-certificatemanager';
-import * as ec2 from '@aws-cdk/aws-ec2';
-import * as ecr from '@aws-cdk/aws-ecr';
-import * as ecs from '@aws-cdk/aws-ecs';
-import * as elbv2 from '@aws-cdk/aws-elasticloadbalancingv2';
-import * as cdk from '@aws-cdk/core';
-import * as role from '@aws-cdk/aws-iam';
-import * as logs from "@aws-cdk/aws-logs";
-import { Duration, StackProps } from '@aws-cdk/core';
-
+import { aws_ecr as ecr, aws_certificatemanager as cm, aws_ec2 as ec2, aws_ecs as ecs, aws_elasticloadbalancingv2 as elbv2, aws_iam as role, Duration, StackProps, aws_logs as logs  } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 export class DashboardECSContainer extends cdk.Stack {
     public sg: ec2.SecurityGroup;
-    constructor(scope: cdk.Construct, id: string, repository: ecr.Repository, clientRepository: ecr.Repository, vpc: ec2.Vpc, prefix: string, props?: StackProps) {
+    constructor(scope: Construct, id: string, repository: ecr.Repository, clientRepository: ecr.Repository, vpc: ec2.Vpc, prefix: string, props?: StackProps) {
         super(scope, id, props);
 
         const taskRole = new role.Role(this, 'taskRole', {
@@ -25,10 +18,10 @@ export class DashboardECSContainer extends cdk.Stack {
         // Dashboard
         const taskDefinition = new ecs.FargateTaskDefinition(this, 'Dashboardbackend-fargattaskdefinition', {
             memoryLimitMiB: 1024,
-            taskRole: taskRole as any,
+            taskRole: taskRole ,
         });
         const container = taskDefinition.addContainer('DashboardBackendContainer', {
-            image: ecs.EcrImage.fromEcrRepository(repository as any),
+            image: ecs.EcrImage.fromEcrRepository(repository ),
             logging: ecs.LogDriver.awsLogs({ streamPrefix: id + "-DashboardBackendContainer", logRetention: 3 })
         });
         container.addPortMappings({
@@ -38,10 +31,10 @@ export class DashboardECSContainer extends cdk.Stack {
         // Client
         const clientTaskDefinition = new ecs.FargateTaskDefinition(this, 'Clientbackend-fargattaskdefinition', {
             memoryLimitMiB: 1024,
-            taskRole: taskRole as any,
+            taskRole: taskRole ,
         });
         const clientContainer = clientTaskDefinition.addContainer('ClientBackendContainer', {
-            image: ecs.EcrImage.fromEcrRepository(clientRepository as any),
+            image: ecs.EcrImage.fromEcrRepository(clientRepository ),
             logging: ecs.LogDriver.awsLogs({ streamPrefix: id + "-ClientBackendContainer", logRetention: 3 })
         });
         clientContainer.addPortMappings({
@@ -49,7 +42,7 @@ export class DashboardECSContainer extends cdk.Stack {
         });
 
         const cluster = new ecs.Cluster(this, 'DashboardBackendCluster', {
-            vpc: vpc as any,
+            vpc: vpc ,
         });
 
 
@@ -86,11 +79,11 @@ export class DashboardECSContainer extends cdk.Stack {
         listener.addTargets('Dashboardbackend-targetgroup', {
             port: 80,
             protocol: elbv2.ApplicationProtocol.HTTP,
-            targets: [service as any],
+            targets: [service ],
             healthCheck: {
                 path: '/health',
-                interval: cdk.Duration.minutes(1) as any,
-                timeout: Duration.seconds(30) as any,
+                interval: cdk.Duration.minutes(1) ,
+                timeout: Duration.seconds(30) ,
                 unhealthyThresholdCount: 10,
             },
         });
@@ -98,15 +91,15 @@ export class DashboardECSContainer extends cdk.Stack {
         listener.addTargets('Clientbackend-targetgroup', {
             port: 80,
             protocol: elbv2.ApplicationProtocol.HTTP,
-            targets: [clientService as any],
+            targets: [clientService ],
             priority: 10,
             conditions: [
                 elbv2.ListenerCondition.hostHeaders([prefix === "dev" ? 'dev-client-api.helpmycase.co.uk' : 'client-api.helpmycase.co.uk'])
             ],
             healthCheck: {
                 path: '/health',
-                interval: cdk.Duration.minutes(1) as any,
-                timeout: Duration.seconds(30) as any,
+                interval: cdk.Duration.minutes(1) ,
+                timeout: Duration.seconds(30) ,
                 unhealthyThresholdCount: 10,
             },
         });
@@ -120,8 +113,8 @@ export class DashboardECSContainer extends cdk.Stack {
             allowAllOutbound: true,
         });
 
-        this.sg.connections.allowFrom(service as any, ec2.Port.allTcp(), 'cluster access');
-        this.sg.connections.allowFrom(clientService as any, ec2.Port.allTcp(), 'client cluster access');
+        this.sg.connections.allowFrom(service , ec2.Port.allTcp(), 'cluster access');
+        this.sg.connections.allowFrom(clientService , ec2.Port.allTcp(), 'client cluster access');
         this.sg.addIngressRule(ec2.Peer.ipv4(vpc.isolatedSubnets[0].ipv4CidrBlock), ec2.Port.allTcp(), 'Lambda');
     }
 }

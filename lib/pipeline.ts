@@ -1,20 +1,20 @@
-import { BuildSpec, LinuxBuildImage, PipelineProject } from '@aws-cdk/aws-codebuild';
-import * as codepipeline from '@aws-cdk/aws-codepipeline';
-import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
-import * as role from '@aws-cdk/aws-iam';
-import * as s3 from '@aws-cdk/aws-s3';
-import * as cdk from '@aws-cdk/core';
+import { aws_s3 as s3, aws_codepipeline as codepipeline, aws_codepipeline_actions as codepipelineAction, aws_iam as role, aws_codebuild as cb } from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+
 
 type TStackInformation = {
   projectName: string,
   repo: string,
   bucketName?: string,
-  environmentVariables?: Record<string, Record<string, string>>;
+  environmentVariables?: {
+    [name: string]: cb.BuildEnvironmentVariable;
+} | undefined;
   branch?: string
 }
 export class Pipeline extends cdk.Stack {
   public s3Role: s3.Bucket | undefined;
-  constructor(scope: cdk.Construct, id: string, stackInformation: TStackInformation, buildspecPath: string, environment: 'dev' | 'prod', props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, stackInformation: TStackInformation, buildspecPath: string, environment: 'dev' | 'prod', props?: cdk.StackProps) {
     super(scope, id, props);
 
 
@@ -45,20 +45,20 @@ export class Pipeline extends cdk.Stack {
     const sourceOutput = new codepipeline.Artifact();
 
     // Codebuild
-    const project = new PipelineProject(this, 'helpmycase-codebuildproject', {
+    const project = new cb.PipelineProject(this, 'helpmycase-codebuildproject', {
       projectName: stackInformation.projectName,
-      buildSpec: BuildSpec.fromSourceFilename(buildspecPath),
-      environmentVariables: stackInformation.environmentVariables as any,
+      buildSpec: cb.BuildSpec.fromSourceFilename(buildspecPath),
+      environmentVariables: stackInformation.environmentVariables,
       environment: {
         privileged: true,
-        buildImage: LinuxBuildImage.STANDARD_5_0,
+        buildImage: cb.LinuxBuildImage.STANDARD_5_0,
       }
     });
 
     project.addToRolePolicy(new role.PolicyStatement({
       actions: ['*'],
       resources: ['*'],
-    }) as any);
+    }) );
 
     // Actions
     const gitHubAction = new codepipelineAction.GitHubSourceAction({

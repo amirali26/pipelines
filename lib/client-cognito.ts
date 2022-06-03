@@ -1,49 +1,46 @@
 
 const verifyEmail = require('../email-templates/verify-email.json');
-import * as cognito from '@aws-cdk/aws-cognito';
-import * as lambda from '@aws-cdk/aws-lambda-nodejs';
-import * as cdk from '@aws-cdk/core';
-import * as ec2 from '@aws-cdk/aws-ec2';
-import * as iam from '@aws-cdk/aws-iam';
-import { Duration } from '@aws-cdk/core';
+import { aws_cognito as cognito, aws_lambda_nodejs as lambda, aws_ec2 as ec2, aws_iam as iam, Duration } from "aws-cdk-lib";
+import * as cdk from "aws-cdk-lib";
+import { Construct } from 'constructs';
 export class HandleMyCaseClientCognito extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, vpc: ec2.Vpc, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, vpc: ec2.Vpc, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const verifyAuthChallengeResponse = new lambda.NodejsFunction(this as any, 'verifyAuthChallengeResponse', {
+    const verifyAuthChallengeResponse = new lambda.NodejsFunction(this , 'verifyAuthChallengeResponse', {
       entry: 'lambda/VerifyAuthChallengeResponse/index.ts',
       bundling: {
         minify: true,
       },
     });
 
-    const defineAuthChallenge = new lambda.NodejsFunction(this as any, 'defineAuthChallenge', {
+    const defineAuthChallenge = new lambda.NodejsFunction(this , 'defineAuthChallenge', {
       entry: 'lambda/DefineAuthChallenge/index.ts',
       bundling: {
         minify: true,
       },
     });
     
-    const postAuthentication = new lambda.NodejsFunction(this as any, 'postAuthentication', {
+    const postAuthentication = new lambda.NodejsFunction(this , 'postAuthentication', {
       entry: 'lambda/PostAuthentication/index.ts',
       bundling: {
         minify: true,
       },
     });
 
-    const preSignUp = new lambda.NodejsFunction(this as any, 'preSignUp', {
+    const preSignUp = new lambda.NodejsFunction(this , 'preSignUp', {
       entry: 'lambda/PreSignUp/index.ts',
       bundling: {
         minify: true,
       },
     });
 
-    const createAuthChallenge = new lambda.NodejsFunction(this as any, 'createAuthChallenge', {
+    const createAuthChallenge = new lambda.NodejsFunction(this , 'createAuthChallenge', {
       entry: 'lambda/CreateAuthChallenge/index.ts',
       bundling: {
         minify: true,
       },
-      timeout: Duration.seconds(15) as any,
+      timeout: Duration.seconds(15) ,
     });
 
     const createAuthChallengePolicy = new iam.PolicyStatement({
@@ -56,8 +53,8 @@ export class HandleMyCaseClientCognito extends cdk.Stack {
       resources: ['*']
     });
 
-    createAuthChallenge.addToRolePolicy(createAuthChallengePolicy as any);
-    postAuthentication.addToRolePolicy(postAuthenticationPolicy as any);
+    createAuthChallenge.addToRolePolicy(createAuthChallengePolicy );
+    postAuthentication.addToRolePolicy(postAuthenticationPolicy );
 
     const _cognito = new cognito.UserPool(this, 'helpmycase-client-userpool', {
       selfSignUpEnabled: true,
@@ -83,11 +80,11 @@ export class HandleMyCaseClientCognito extends cdk.Stack {
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       lambdaTriggers: {
-        createAuthChallenge: createAuthChallenge as any,
-        defineAuthChallenge: defineAuthChallenge as any,
-        preSignUp: preSignUp as any,
-        verifyAuthChallengeResponse: verifyAuthChallengeResponse as any,
-        postAuthentication: postAuthentication as any,
+        createAuthChallenge: createAuthChallenge ,
+        defineAuthChallenge: defineAuthChallenge ,
+        preSignUp: preSignUp ,
+        verifyAuthChallengeResponse: verifyAuthChallengeResponse ,
+        postAuthentication: postAuthentication ,
       },
       standardAttributes: {
         fullname: {

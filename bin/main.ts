@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import * as cdk from '@aws-cdk/core';
+import * as cdk from "aws-cdk-lib";
 import 'source-map-support/register';
 import { BackendCodeArtifact } from '../lib/backend-code-artifact';
 import { HandleMyCaseClientCognito } from '../lib/client-cognito';
@@ -191,5 +191,5 @@ new HandleMyCaseClientCognito(app, prefix + '-HandleMyCaseClientCognitoStack', d
   DYNAMO
 
 */
-const lambdaFunctions = new LambdaFunctions(app, prefix + '-HandleMyCaseLambdaFunctions', imageUploadBucket, { env: envEuWest1 });
+const lambdaFunctions = new LambdaFunctions(app, prefix + '-HandleMyCaseLambdaFunctions', prefix, imageUploadBucket, { env: envEuWest1 });
 new DynamoTables(app, prefix + '-HandleMyCaseDynamoTables', lambdaFunctions.createRequestLambda, { env: envEuWest1 });

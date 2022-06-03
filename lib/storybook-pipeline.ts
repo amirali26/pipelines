@@ -1,16 +1,10 @@
-import * as codeartifact from '@aws-cdk/aws-codeartifact';
-import {
-  BuildSpec,
-  LinuxBuildImage,
-  PipelineProject,
-} from '@aws-cdk/aws-codebuild';
-import * as codepipeline from '@aws-cdk/aws-codepipeline';
-import * as codepipelineAction from '@aws-cdk/aws-codepipeline-actions';
-import * as role from '@aws-cdk/aws-iam';
-import * as cdk from '@aws-cdk/core';
+import * as cdk from 'aws-cdk-lib';
+import { aws_codebuild as cb, aws_codepipeline as codepipeline, aws_codepipeline_actions as codepipelineAction, aws_iam as role, aws_codeartifact as codeartifact } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+
 
 export class StorybookCodeArtifactPipeline extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // Artifacts
@@ -38,13 +32,13 @@ export class StorybookCodeArtifactPipeline extends cdk.Stack {
     );
 
     // Codebuild
-    const project = new PipelineProject(this, 'helpmycase-storybook-project', {
+    const project = new cb.PipelineProject(this, 'helpmycase-storybook-project', {
       projectName: 'helpmycase-storybook',
       environment: {
-        buildImage: LinuxBuildImage.STANDARD_5_0,
+        buildImage: cb.LinuxBuildImage.STANDARD_5_0,
       },
-      role: codeartifactRole as any,
-      buildSpec: BuildSpec.fromSourceFilename('buildspec.yaml'),
+      role: codeartifactRole ,
+      buildSpec: cb.BuildSpec.fromSourceFilename('buildspec.yaml'),
       environmentVariables: {
         
       },
