@@ -39,6 +39,7 @@ async function sendEnquirySubmissionEmail(body: EnquirySubmissionEmail) {
         Template: "HelpMyCase-EnquirySubmitted",
         TemplateData: JSON.stringify({
             email: body.RequestEmail,
+            url: body.Url,
         })
     }).promise();
     await ses.sendTemplatedEmail({
@@ -49,21 +50,27 @@ async function sendEnquirySubmissionEmail(body: EnquirySubmissionEmail) {
         Template: "HelpMyCase-EnquiryReceived",
         TemplateData: JSON.stringify({
             email: body.RequestEmail,
+            url: body.Url,
         })
     }).promise();
 }
 
 async function sendRequestSubmissionEmail(body: EnquirySubmissionEmail) {
-    await ses.sendTemplatedEmail({
-        Destination: {
-            ToAddresses: [body.RequestEmail],
-        },
-        Source: sourceEmail,
-        Template: "HelpMyCase-RequestSubmitted",
-        TemplateData: JSON.stringify({
-            name: body.Name
-        })
-    }).promise();
+    try {
+        await ses.sendTemplatedEmail({
+            Destination: {
+                ToAddresses: [body.RequestEmail],
+            },
+            Source: sourceEmail,
+            Template: "HelpMyCase-RequestSubmitted",
+            TemplateData: JSON.stringify({
+                name: body.Name,
+                url: body.Url,
+            })
+        }).promise();
+    } catch(e) {
+        console.log(e);
+    }
 }
 
 async function sendAddedToFirmEmail(body: EnquirySubmissionEmail) {
@@ -75,7 +82,7 @@ async function sendAddedToFirmEmail(body: EnquirySubmissionEmail) {
         Template: "HelpMyCase-AddedToFirm",
         TemplateData: JSON.stringify({
             "firm_name": body.FirmName,
-            url: 'https://localhost:3001/',
+            url: body.Url
         })
     }).promise();
 }
@@ -89,7 +96,7 @@ async function sendFirmVerification(body: EnquirySubmissionEmail) {
         Template: "HelpMyCase-FirmCreationVerification",
         TemplateData: JSON.stringify({
             "firm_name": body.FirmName,
-            "firm_id": body.VerificationId,
+            url: body.Url + "/activate/firm/" + body.VerificationId,
         })
     }).promise();
 }
