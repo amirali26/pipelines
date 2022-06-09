@@ -14,7 +14,7 @@ export const handler = async (event) => {
       ["starts-with", "$Content-Type", "image/"],
     ],
     Fields: {
-      key: `${type}/${uuid}`,
+      key: `firm/${uuid}`,
       contentType,
     },
   });

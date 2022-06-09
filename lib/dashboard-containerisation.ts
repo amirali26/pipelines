@@ -105,7 +105,10 @@ export class DashboardECSContainer extends cdk.Stack {
         });
 
         const clientLogGroup = new logs.LogGroup(this, "ClientLogGroup", {
-            retention: logs.RetentionDays.ONE_WEEK,
+            retention: logs.RetentionDays.ONE_DAY,
+        });
+        const dashboardLogGroup = new logs.LogGroup(this, "DashboardLogGroup", {
+            retention: logs.RetentionDays.ONE_DAY,
         });
 
         this.sg = new ec2.SecurityGroup(this, 'rds-security-group', {

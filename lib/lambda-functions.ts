@@ -34,11 +34,12 @@ export class LambdaFunctions extends cdk.Stack {
       },
     });
 
+    const allowedOrigins = prefix === 'dev' ? ["https://dev-solicitor.helpmycase.co.uk", "http://localhost:3000"] : ["https://solicitor.helpmycase.co.uk"]
     this.createSignedUrl.addFunctionUrl({
       authType: lambdaBasic.FunctionUrlAuthType.NONE,
       cors: {
         allowedHeaders: ["*"],
-        allowedOrigins: [prefix === 'dev' ? "https://dev-solicitor.helpmycase.co.uk" : "https://solicitor.helpmycase.co.uk"],
+        allowedOrigins: allowedOrigins,
         allowedMethods: [lambdaBasic.HttpMethod.POST],
       }
     });
