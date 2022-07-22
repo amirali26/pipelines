@@ -11,7 +11,7 @@ export class DashboardDatabase extends cdk.Stack {
                 version: rds.MysqlEngineVersion.VER_8_0_25,
             }),
             // optional, defaults to m5.large
-            instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.SMALL) ,
+            instanceType: ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.MICRO) ,
             credentials: rds.Credentials.fromGeneratedSecret('syscdk'), // Optional - will default to 'admin' username and generated password
             vpc: vpc ,
             vpcSubnets: {

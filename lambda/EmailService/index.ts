@@ -15,7 +15,7 @@ exports.handler = async function (event: SQSEvent) {
             case (EmailTypes.ENQUIRY_SUBMISSION):
                 sourceEmail = "Helpmycase - Enquiries " + sourceEmail;
                 await sendEnquirySubmissionEmail(JSON.parse(queueInfo.body), sourceEmail);
-                break
+                break;
             case (EmailTypes.FIRM_INVITATION):
                 sourceEmail = "Helpmycase - Firms " + sourceEmail
                 await sendAddedToFirmEmail(JSON.parse(queueInfo.body), sourceEmail);
@@ -27,6 +27,10 @@ exports.handler = async function (event: SQSEvent) {
             case (EmailTypes.FIRM_VERIFICATION):
                 sourceEmail = "Helpmycase - Firms " + sourceEmail
                 await sendFirmVerification(JSON.parse(queueInfo.body), sourceEmail);
+                break;
+            case (EmailTypes.REQUEST_CALLBACK):
+                sourceEmail = "Helpmycase - Request Callback " + sourceEmail
+                await requestCallbackEmail(JSON.parse(queueInfo.body), sourceEmail);
                 break;
             default:
                 throw Error('Invalid Message Group ID');
@@ -80,6 +84,23 @@ async function sendRequestSubmissionEmail(body: EnquirySubmissionEmail, sourceEm
         console.log(e);
     }
 }
+async function requestCallbackEmail(body: EnquirySubmissionEmail, sourceEmail: string) {
+    try {
+        await ses.sendTemplatedEmail({
+            Destination: {
+                ToAddresses: [body.RequestEmail],
+            },
+            Source: sourceEmail,
+            Template: "HelpMyCase-RequestCallback",
+            TemplateData: JSON.stringify({
+                solicitorResponseNumber: body.SolicitorResponseNumber,
+                url: body.Url,
+            })
+        }).promise();
+    } catch(e) {
+        console.log(e);
+    }
+}
 
 async function sendAddedToFirmEmail(body: EnquirySubmissionEmail, sourceEmail: string) {
     await ses.sendTemplatedEmail({
@@ -104,7 +125,7 @@ async function sendFirmVerification(body: EnquirySubmissionEmail, sourceEmail: s
         Template: "HelpMyCase-FirmCreationVerification",
         TemplateData: JSON.stringify({
             "firm_name": body.FirmName,
-            url: body.Url + "/activate/firm/" + body.VerificationId,
+            url: body.Url + "activate/firm/" + body.VerificationId,
         })
     }).promise();
 }

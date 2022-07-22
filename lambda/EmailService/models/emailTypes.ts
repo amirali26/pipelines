@@ -3,6 +3,7 @@ export enum EmailTypes {
     FIRM_INVITATION = 'FirmInvitation',
     REQUEST_SUBMISSION = 'RequestSubmission',
     FIRM_VERIFICATION = 'FirmVerification',
+    REQUEST_CALLBACK = 'RequestCallback',
 }
 
 export type EmailBody = {
